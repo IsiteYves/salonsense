@@ -445,7 +445,176 @@ function Kogosha() {
 }
 
 function AmafarangaAbagoshiBabikuje() {
-  return <h2>Amafaranga abagoshi babikuje</h2>;
+  const [abogoshi, setAbogoshi] = useState([]);
+  const [barbLoading, setBarbLoading] = useState(false);
+  const [barber, setBarber] = useState("");
+  const [amount, setAmount] = useState(null);
+  const [modalIsOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const fetchAbogoshi = async () => {
+    try {
+      setBarbLoading(true);
+      const response = await axios.get("shaves");
+      setAbogoshi(response.data);
+      const res = await axios.get("barbers");
+      setOptions(res.data);
+      setBarbLoading(false);
+    } catch (e) {
+      const { response } = e;
+      if (response.status === 400) {
+        alert("Network Error");
+      } else {
+        alert("Network Error.You can refresh the page.");
+      }
+      setBarbLoading(false);
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    // Create a new barber object with the form data
+    try {
+      if (isNaN(parseInt(amount)) || parseInt(amount) < 0) {
+        alert("Please provide a valid amount of money.");
+        return;
+      }
+      if (barber?.balance - parseInt(amount) < 0) {
+        alert("Uyu mwogoshi ntabwo afitemo amafaranga ahagije");
+        return;
+      }
+      const barberUpd = {
+        ...barber,
+        balance: barber.balance - parseInt(amount),
+      };
+      setLoading(true);
+      await axios.put(`barbers/${barber._id}`, barberUpd);
+      const res = await axios.post("withdrawals", {
+        barber: barber._id,
+        amount: parseInt(amount),
+      });
+      setLoading(false);
+      alert("Successfully created!");
+      setIsOpen(false);
+      const n = [...abogoshi];
+      n.push(res.data);
+      setAbogoshi(n);
+      setBarber(null);
+      setAmount(null);
+    } catch (e) {
+      setLoading(false);
+      alert(`Failed to submit data: ${e.message}`);
+    }
+  };
+  const [options, setOptions] = useState([]);
+
+  useEffect(() => {
+    fetchAbogoshi();
+  }, []);
+  return (
+    <div>
+      <h2>Abogoshwe</h2>
+      <button
+        onClick={async () => {
+          setIsOpen(true);
+        }}
+      >
+        Kubikura +
+      </button>
+      <div>
+        {barbLoading ? (
+          <p>Loading data...</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Umwogoshi</th>
+                <th>Amafaranga yamwogosheye</th>
+                <th>Itariki</th>
+              </tr>
+            </thead>
+            <tbody>
+              {abogoshi.map((barber) => (
+                <tr key={barber._id}>
+                  <td>
+                    {options.find((brb) => brb?._id === barber.barber)?.name}
+                  </td>
+                  <td>{formatPrice(barber?.amountPaid)} Rwf</td>
+                  <td>
+                    {new Date(barber?.date).toISOString().split("T")[0]}
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    {formatTime(new Date(barber?.date).toISOString())}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {abogoshi.length < 1 && !barbLoading ? (
+          <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
+            Nta bakiriya barogoshwa.
+          </p>
+        ) : (
+          ""
+        )}
+      </div>
+      <Modal
+        isOpen={modalIsOpen}
+        style={customStyles}
+        contentLabel="Example Modal"
+      >
+        <button
+          onClick={() => setIsOpen(false)}
+          style={{
+            marginBottom: "1rem",
+            background: "red",
+            color: "#fff",
+            border: "none",
+            outline: "none",
+            padding: "8px 14px",
+            cursor: "pointer",
+            borderRadius: "4px",
+          }}
+        >
+          Close
+        </button>
+        <form onSubmit={handleSubmit} style={addForm} id="addForm">
+          <div>
+            <label htmlFor="barber">Umwogoshi</label>
+            <select
+              id="barber"
+              required
+              onChange={(event) =>
+                setBarber(
+                  options.find((option) => option._id === event.target.value)
+                )
+              }
+            >
+              <option value="">Choose barber</option>
+              {options.map((option) => (
+                <option key={option._id} value={option._id}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="phone">Amafaranga amwogosheye</label>
+            <input
+              type="tel"
+              id="phone"
+              placeholder="Rwf"
+              maxLength={5}
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+              required
+            />
+          </div>
+          <button type="submit">{loading ? "Creating..." : "Create"}</button>
+        </form>
+      </Modal>
+    </div>
+  );
 }
 
 function Dashboard() {

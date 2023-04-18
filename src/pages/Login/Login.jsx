@@ -40,6 +40,7 @@ const Login = () => {
       });
       const { token } = response.data;
       localStorage.setItem("token", token);
+      window.location.reload();
       setLoginLoading(false);
     } catch (error) {
       const { response } = error;
@@ -248,7 +249,13 @@ const Login = () => {
           onChange={handlePasswordChange}
           required
         />
-        <button type="submit" disabled={loginLoading}>
+        <button
+          type="submit"
+          disabled={loginLoading}
+          style={{
+            cursor: loginLoading ? "no-drop" : "pointer",
+          }}
+        >
           {loginLoading ? "Loading..." : "Login"}
         </button>
       </form>

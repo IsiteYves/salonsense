@@ -1,3 +1,52 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#addForm label {
+  display: block;
+  margin-bottom: 5px;
+  text-align: left;
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+}
+
+#addForm input[type="text"],
+#addForm input[type="email"],
+#addForm input[type="tel"],
+#addForm select,
+#addForm input[type="password"] {
+  width: 95%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #969696;
+  border-radius: 5px;
+  font-size: 16px;
+  outline: none;
+  color: #333;
+}
+
+#addForm button[type="submit"],
+#addForm button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  background-color: #333;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#addForm button[type="submit"]:hover,
+#addForm button:hover {
+  background-color: #555;
+}
+
 body {
   background-color: #ccc;
   margin: 0;

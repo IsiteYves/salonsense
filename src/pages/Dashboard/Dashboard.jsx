@@ -5,7 +5,7 @@ import DashboardStyled from "./DashboardStyled";
 import Modal from "react-modal";
 import axios from "axios";
 
-function formatPrice(price) {
+const formatPrice = (price) => {
   // Check if price is a valid number
   if (isNaN(price)) {
     return "";
@@ -16,7 +16,17 @@ function formatPrice(price) {
 
   // Combine the dollars and cents with a period
   return formatted;
-}
+};
+
+const formatTime = (systemTime) => {
+  const systemTimeUTC = Date.parse(systemTime);
+  const localTime = new Date(systemTimeUTC);
+  const hours = localTime.getHours();
+  const minutes = localTime.getMinutes();
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  return `${hours % 12}:${minutes < 10 ? "0" + minutes : minutes} ${ampm}`;
+};
 
 Modal.setAppElement("#root");
 const customStyles = {
@@ -357,7 +367,11 @@ function Kogosha() {
                     {options.find((brb) => brb?._id === barber.barber)?.name}
                   </td>
                   <td>{formatPrice(barber?.amountPaid)} Rwf</td>
-                  <td>{new Date(barber?.date).toISOString().split("T")[0]}</td>
+                  <td>
+                    {new Date(barber?.date).toISOString().split("T")[0]}
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    {formatTime(new Date(barber?.date).toISOString())}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -417,7 +431,7 @@ function Kogosha() {
               type="tel"
               id="phone"
               placeholder="Rwf"
-              maxLength={10}
+              maxLength={5}
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
               required

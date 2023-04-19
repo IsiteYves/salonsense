@@ -3,6 +3,7 @@ import { Route, Link, Routes, Navigate, useNavigate } from "react-router-dom";
 import NotFound from "../../components/Notfound";
 import DashboardStyled from "./DashboardStyled";
 import Modal from "react-modal";
+import jwt_decode from "jwt-decode";
 import axios from "axios";
 
 const formatPrice = (price) => {
@@ -48,9 +49,17 @@ const customStyles = {
 const addForm = {};
 
 function Abogoshi() {
-  const handleEdit = (barberId) => {
-    // Handle edit action for the barber with the given ID
-    console.log(`Edit clicked for barber with ID ${barberId}`);
+  const [abakozi, setAbakozi] = useState([...options]);
+
+  const handleEdit = (barber) => {
+    setEditMode(true);
+    const { name, phone, address, nid } = barber;
+    setEditUsr(barber);
+    setName(name);
+    setPhone(phone);
+    setAddress(address);
+    setNid(nid);
+    setIsOpen(true);
   };
 
   const handleDelete = async (barberId) => {
@@ -60,6 +69,7 @@ function Abogoshi() {
         await axios.delete(`barbers/${barberId}`);
         alert("Successfully deleted.");
         const n = options.filter((umwogoshi) => umwogoshi._id !== barberId);
+        setAbakozi(n);
         options = n;
       }
     } catch (e) {
@@ -73,6 +83,8 @@ function Abogoshi() {
   const [nid, setNid] = useState("");
   const [modalIsOpen, setIsOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editUsr, setEditUsr] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -82,7 +94,7 @@ function Abogoshi() {
       phone,
       address,
       nid,
-      balance: 0,
+      balance: editUsr?.balance,
     };
     try {
       if (phone.length !== 10 || isNaN(parseInt(phone))) {
@@ -90,13 +102,26 @@ function Abogoshi() {
         return;
       }
       setCreateLoading(true);
-      const res = await axios.post("barbers", newBarber);
+      if (editMode) {
+        await axios.put(`barbers/${editUsr?._id}`, newBarber);
+        const n = abakozi.map((umukozi) => {
+          if (umukozi?._id === editUsr?._id) {
+            return { _id: editUsr?._id, ...newBarber };
+          }
+          return umukozi;
+        });
+        options = n;
+        setAbakozi(n);
+      } else {
+        const res = await axios.post("barbers", newBarber);
+        const n = [...options];
+        n.push(res.data);
+        options = n;
+        setAbakozi(n);
+      }
+      alert(`Successfully ${editMode ? "updated" : "created"}!`);
       setCreateLoading(false);
-      alert("Successfully created!");
       setIsOpen(false);
-      const n = [...options];
-      n.push(res.data);
-      options = n;
       setName("");
       setPhone("");
       setAddress("");
@@ -124,7 +149,7 @@ function Abogoshi() {
             </tr>
           </thead>
           <tbody>
-            {options.map((barber, i) => (
+            {abakozi.map((barber, i) => (
               <tr key={barber._id}>
                 <td>{i + 1}</td>
                 <td>{barber.name}</td>
@@ -151,7 +176,7 @@ function Abogoshi() {
                 </td>
                 <td>
                   <button
-                    onClick={() => handleEdit(barber._id)}
+                    onClick={() => handleEdit(barber)}
                     style={{
                       padding: "6px 14px",
                       background: "green",
@@ -196,7 +221,15 @@ function Abogoshi() {
         contentLabel="Example Modal"
       >
         <button
-          onClick={() => setIsOpen(false)}
+          onClick={() => {
+            setIsOpen(false);
+            setEditMode(false);
+            setName("");
+            setPhone("");
+            setAddress("");
+            setNid("");
+            setEditUsr(null);
+          }}
           style={{
             marginBottom: "1rem",
             background: "red",
@@ -211,6 +244,9 @@ function Abogoshi() {
           Close
         </button>
         <form onSubmit={handleSubmit} style={addForm} id="addForm">
+          <h2 style={{ marginBottom: "1rem", textAlign: "center" }}>
+            {editMode ? "Edit Barber Info" : "Umwogoshi Mushya"}
+          </h2>
           <div>
             <label htmlFor="name">Name *</label>
             <input
@@ -253,7 +289,13 @@ function Abogoshi() {
             />
           </div>
           <button type="submit">
-            {createLoading ? "Creating barber..." : "Create Barber"}
+            {createLoading
+              ? editMode
+                ? "Updating barber..."
+                : "Creating barber..."
+              : editMode
+              ? "Update Barber"
+              : "Create Barber"}
           </button>
         </form>
       </Modal>
@@ -410,8 +452,11 @@ function Kogosha() {
           Close
         </button>
         <form onSubmit={handleSubmit} style={addForm} id="addForm">
+          <h2 style={{ marginBottom: "1rem", textAlign: "center" }}>
+            Hogoshwe Umuntu
+          </h2>
           <div>
-            <label htmlFor="barber">Umwogoshi</label>
+            <label htmlFor="barber">Uwamwogoshe</label>
             <select
               id="barber"
               required
@@ -421,7 +466,7 @@ function Kogosha() {
                 )
               }
             >
-              <option value="">Choose barber</option>
+              <option value="">-- Choose --</option>
               {options.map((option) => (
                 <option key={option._id} value={option._id}>
                   {option.name}
@@ -580,6 +625,9 @@ function AmafarangaAbagoshiBabikuje() {
           Close
         </button>
         <form onSubmit={handleSubmit} style={addForm} id="addForm">
+          <h2 style={{ marginBottom: "1rem", textAlign: "center" }}>
+            Kubikurira Umwogoshi
+          </h2>
           <div>
             <label htmlFor="barber">Umwogoshi</label>
             <select
@@ -591,7 +639,7 @@ function AmafarangaAbagoshiBabikuje() {
                 )
               }
             >
-              <option value="">Choose barber</option>
+              <option value="">-- Choose --</option>
               {options.map((option) => (
                 <option key={option._id} value={option._id}>
                   {option.name} (Balance:{" "}
@@ -784,20 +832,35 @@ function Dashboard() {
     }
   };
   const navigate = useNavigate();
+  const [role, setRole] = useState("");
   useEffect(() => {
     if (!localStorage.getItem("token")) {
       navigate("/");
+    } else {
+      const token = localStorage.getItem("token");
+      const decoded = jwt_decode(token);
+      if (
+        decoded?.user?.role !== "BLBR_ADMIN" &&
+        decoded?.user?.role !== "BLBR_CASHIER"
+      )
+        navigate("/");
+      else setRole(decoded?.user?.role);
     }
     document.body.style.backgroundColor = "#fff";
     calc();
   }, []);
+  useEffect(() => {
+    console.log("role..", role);
+  }, [role]);
   return (
     <DashboardStyled>
       <div className="sidebar">
         <ul>
-          <li>
-            <Link to="/abogoshi">Abogoshi</Link>
-          </li>
+          {role === "BLBR_ADMIN" && (
+            <li>
+              <Link to="/abogoshi">Abogoshi</Link>
+            </li>
+          )}
           <li>
             <Link to="/kogosha">Ayavuye mu kogosha</Link>
           </li>
@@ -806,9 +869,11 @@ function Dashboard() {
               Amafaranga abagoshi bahawe
             </Link>
           </li>
-          <li>
-            <Link to="/settings">Settings</Link>
-          </li>
+          {role === "BLBR_ADMIN" && (
+            <li>
+              <Link to="/settings">Settings</Link>
+            </li>
+          )}
           <li
             onClick={() => {
               localStorage.removeItem("token");
@@ -824,7 +889,14 @@ function Dashboard() {
       ) : (
         <div className="main-content">
           <Routes>
-            <Route path="/" element={<Navigate to="abogoshi" />} />
+            <Route
+              path="/"
+              element={
+                <Navigate
+                  to={role && role === "BLBR_ADMIN" ? "/abogoshi" : "/kogosha"}
+                />
+              }
+            />
             <Route path="/abogoshi" exact element={<Abogoshi />} />
             <Route path="/kogosha" exact element={<Kogosha />} />
             <Route path="/settings" exact element={<Settings />} />

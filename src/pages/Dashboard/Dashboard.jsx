@@ -106,7 +106,7 @@ function Abogoshi() {
         await axios.put(`barbers/${editUsr?._id}`, newBarber);
         const n = abakozi.map((umukozi) => {
           if (umukozi?._id === editUsr?._id) {
-            return { _id: editUsr?._id, ...newBarber };
+            return { _id: editUsr?._id, date: editUsr?.date, ...newBarber };
           }
           return umukozi;
         });

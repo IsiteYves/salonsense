@@ -28,6 +28,9 @@ const formatTime = (systemTime) => {
   return `${hours % 12}:${minutes < 10 ? "0" + minutes : minutes} ${ampm}`;
 };
 
+let percentage = 0;
+let options = [];
+
 Modal.setAppElement("#root");
 const customStyles = {
   content: {
@@ -45,8 +48,6 @@ const customStyles = {
 const addForm = {};
 
 function Abogoshi() {
-  const [abogoshi, setAbogoshi] = useState([]);
-  const [barbLoading, setBarbLoading] = useState(false);
   const handleEdit = (barberId) => {
     // Handle edit action for the barber with the given ID
     console.log(`Edit clicked for barber with ID ${barberId}`);
@@ -58,8 +59,8 @@ function Abogoshi() {
       if (window.confirm("Are you sure you want to delete this barber?")) {
         await axios.delete(`barbers/${barberId}`);
         alert("Successfully deleted.");
-        const n = abogoshi.filter((umwogoshi) => umwogoshi._id !== barberId);
-        setAbogoshi(n);
+        const n = options.filter((umwogoshi) => umwogoshi._id !== barberId);
+        options = n;
       }
     } catch (e) {
       alert(`Failed to delete data: ${e.message}.Please try again.`);
@@ -72,26 +73,6 @@ function Abogoshi() {
   const [nid, setNid] = useState("");
   const [modalIsOpen, setIsOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
-  const [percentage, setPercentage] = useState(0);
-
-  const fetchAbogoshi = async () => {
-    try {
-      setBarbLoading(true);
-      const response = await axios.get("barbers");
-      setAbogoshi(response.data);
-      const res2 = await axios.get("settings");
-      setPercentage(res2.data?.percentage);
-      setBarbLoading(false);
-    } catch (e) {
-      const { response } = e;
-      if (response.status === 400) {
-        alert("Network Error");
-      } else {
-        alert("Network Error.You can refresh the page.");
-      }
-      setBarbLoading(false);
-    }
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -113,9 +94,9 @@ function Abogoshi() {
       setCreateLoading(false);
       alert("Successfully created!");
       setIsOpen(false);
-      const n = [...abogoshi];
+      const n = [...options];
       n.push(res.data);
-      setAbogoshi(n);
+      options = n;
       setName("");
       setPhone("");
       setAddress("");
@@ -124,94 +105,84 @@ function Abogoshi() {
       alert(`Failed to submit data: ${e.message}`);
     }
   };
-
-  useEffect(() => {
-    fetchAbogoshi();
-  }, []);
   return (
     <div>
       <h2>Abogoshi</h2>
       <button onClick={() => setIsOpen(true)}>Umwogoshi Mushya +</button>
       <div>
-        {barbLoading ? (
-          <p>Loading data...</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Name</th>
-                <th>Phone</th>
-                <th>Address</th>
-                <th>NID</th>
-                <th>Balance</th>
-                <th>Registered on</th>
-                <th>Actions</th>
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Address</th>
+              <th>NID</th>
+              <th>Balance</th>
+              <th>Registered on</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {options.map((barber, i) => (
+              <tr key={barber._id}>
+                <td>{i + 1}</td>
+                <td>{barber.name}</td>
+                <td>{barber.phone}</td>
+                <td
+                  style={{
+                    textAlign: barber.address ? "left" : "center",
+                  }}
+                >
+                  {barber.address ? barber.address : "-"}
+                </td>
+                <td
+                  style={{
+                    textAlign: barber.nid ? "left" : "center",
+                  }}
+                >
+                  {barber.nid ? barber.nid : "-"}
+                </td>
+                <td>{formatPrice((percentage / 100) * barber.balance)}</td>
+                <td>
+                  {new Date(barber?.date).toISOString().split("T")[0]}
+                  &nbsp;&nbsp;&nbsp;&nbsp;
+                  {formatTime(new Date(barber?.date).toISOString())}
+                </td>
+                <td>
+                  <button
+                    onClick={() => handleEdit(barber._id)}
+                    style={{
+                      padding: "6px 14px",
+                      background: "green",
+                      color: "#fff",
+                      border: "none",
+                      outline: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Edit
+                  </button>{" "}
+                  |{" "}
+                  <button
+                    onClick={() => handleDelete(barber._id)}
+                    style={{
+                      padding: "6px 14px",
+                      background: "red",
+                      color: "#fff",
+                      border: "none",
+                      outline: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {abogoshi.map((barber, i) => (
-                <tr key={barber._id}>
-                  <td>{i + 1}</td>
-                  <td>{barber.name}</td>
-                  <td>{barber.phone}</td>
-                  <td
-                    style={{
-                      textAlign: barber.address ? "left" : "center",
-                    }}
-                  >
-                    {barber.address ? barber.address : "-"}
-                  </td>
-                  <td
-                    style={{
-                      textAlign: barber.nid ? "left" : "center",
-                    }}
-                  >
-                    {barber.nid ? barber.nid : "-"}
-                  </td>
-                  <td>
-                    {formatPrice(((100 - percentage) / 100) * barber.balance)}
-                  </td>
-                  <td>
-                    {new Date(barber?.date).toISOString().split("T")[0]}
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    {formatTime(new Date(barber?.date).toISOString())}
-                  </td>
-                  <td>
-                    <button
-                      onClick={() => handleEdit(barber._id)}
-                      style={{
-                        padding: "6px 14px",
-                        background: "green",
-                        color: "#fff",
-                        border: "none",
-                        outline: "none",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Edit
-                    </button>{" "}
-                    |{" "}
-                    <button
-                      onClick={() => handleDelete(barber._id)}
-                      style={{
-                        padding: "6px 14px",
-                        background: "red",
-                        color: "#fff",
-                        border: "none",
-                        outline: "none",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-        {abogoshi.length < 1 && !barbLoading ? (
+            ))}
+          </tbody>
+        </table>
+        {options.length < 1 ? (
           <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
             Nta bogoshi bahari ubu.
           </p>
@@ -298,17 +269,12 @@ function Kogosha() {
   const [modalIsOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
-  const [percentage, setPercentage] = useState(0);
 
   const fetchAbogoshi = async () => {
     try {
       setBarbLoading(true);
       const response = await axios.get("shaves");
       setAbogoshi(response.data);
-      const res = await axios.get("barbers");
-      setOptions(res.data);
-      const res2 = await axios.get("settings");
-      setPercentage(res2.data?.percentage);
       let tot = 0;
       for (let dt of response.data) {
         tot += dt?.amountPaid;
@@ -358,7 +324,6 @@ function Kogosha() {
       alert(`Failed to submit data: ${e.message}`);
     }
   };
-  const [options, setOptions] = useState([]);
 
   useEffect(() => {
     fetchAbogoshi();
@@ -489,19 +454,13 @@ function AmafarangaAbagoshiBabikuje() {
   const [barber, setBarber] = useState("");
   const [amount, setAmount] = useState(null);
   const [modalIsOpen, setIsOpen] = useState(false);
-  const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [percentage, setPercentage] = useState(0);
 
   const fetchAbogoshi = async () => {
     try {
       setBarbLoading(true);
       const response = await axios.get("withdrawals");
       setAbogoshi(response.data);
-      const res = await axios.get("barbers");
-      setOptions(res.data);
-      const res2 = await axios.get("settings");
-      setPercentage(res2.data?.percentage);
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;
@@ -522,7 +481,7 @@ function AmafarangaAbagoshiBabikuje() {
         alert("Please provide a valid amount of money.");
         return;
       }
-      if (((100 - percentage) / 100) * barber?.balance - parseInt(amount) < 0) {
+      if ((percentage / 100) * barber?.balance - parseInt(amount) < 0) {
         alert("Uyu mwogoshi ntabwo afitemo amafaranga ahagije");
         return;
       }
@@ -635,7 +594,8 @@ function AmafarangaAbagoshiBabikuje() {
               <option value="">Choose barber</option>
               {options.map((option) => (
                 <option key={option._id} value={option._id}>
-                  {option.name}
+                  {option.name} (Balance:{" "}
+                  {formatPrice((percentage / 100) * option.balance)})
                 </option>
               ))}
             </select>
@@ -804,12 +764,32 @@ const Settings = () => {
 };
 
 function Dashboard() {
+  const [barbLoading, setBarbLoading] = useState(true);
+  const calc = async () => {
+    try {
+      setBarbLoading(true);
+      const res2 = await axios.get("settings");
+      percentage = res2.data?.percentage;
+      const res = await axios.get("barbers");
+      options = res.data;
+      setBarbLoading(false);
+    } catch (e) {
+      const { response } = e;
+      if (response.status === 400) {
+        alert("Network Error");
+      } else {
+        alert("Please refresh the page.");
+      }
+      setBarbLoading(false);
+    }
+  };
   const navigate = useNavigate();
   useEffect(() => {
     if (!localStorage.getItem("token")) {
       navigate("/");
     }
     document.body.style.backgroundColor = "#fff";
+    calc();
   }, []);
   return (
     <DashboardStyled>
@@ -839,19 +819,23 @@ function Dashboard() {
           </li>
         </ul>
       </div>
-      <div className="main-content">
-        <Routes>
-          <Route path="/" element={<Navigate to="abogoshi" />} />
-          <Route path="/abogoshi" exact element={<Abogoshi />} />
-          <Route path="/kogosha" exact element={<Kogosha />} />
-          <Route path="/settings" exact element={<Settings />} />
-          <Route
-            path="/amafaranga-abagoshi-babikuje"
-            element={<AmafarangaAbagoshiBabikuje />}
-          />
-          <Route path="*" element={<NotFound />}></Route>
-        </Routes>
-      </div>
+      {barbLoading ? (
+        <p style={{ margin: "3rem" }}>Loading data...</p>
+      ) : (
+        <div className="main-content">
+          <Routes>
+            <Route path="/" element={<Navigate to="abogoshi" />} />
+            <Route path="/abogoshi" exact element={<Abogoshi />} />
+            <Route path="/kogosha" exact element={<Kogosha />} />
+            <Route path="/settings" exact element={<Settings />} />
+            <Route
+              path="/amafaranga-abagoshi-babikuje"
+              element={<AmafarangaAbagoshiBabikuje />}
+            />
+            <Route path="*" element={<NotFound />}></Route>
+          </Routes>
+        </div>
+      )}
     </DashboardStyled>
   );
 }

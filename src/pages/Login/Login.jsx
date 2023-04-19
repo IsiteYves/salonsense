@@ -10,6 +10,7 @@ const Login = () => {
 
   const [rCode, setRCode] = useState("");
   const [resetPhone, setResetPhone] = useState("");
+  const [resetUnm, setResetUnm] = useState("");
   const [usCode, setUsCode] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
@@ -67,7 +68,9 @@ const Login = () => {
     e.preventDefault();
     try {
       setResetLoading(true);
-      const response = await axios.get(`admin/get-reset-code/${resetPhone}`);
+      const response = await axios.get(
+        `admin/get-reset-code?phone=${resetPhone}&username=${resetUnm}`
+      );
       const { resetCode } = response.data;
       setRCode(resetCode);
       setForgotPassword(false);
@@ -77,7 +80,7 @@ const Login = () => {
     } catch (error) {
       const { response } = error;
       if (response.status === 404) {
-        alert("Phone number not found");
+        alert("User with those info was not found");
       } else {
         alert("Network error");
       }
@@ -132,6 +135,14 @@ const Login = () => {
         <h2>Forgot Password</h2>
         <p>Andika nimero ya telephone.</p>
         <form onSubmit={handleReset}>
+          <label htmlFor="phone">Username:</label>
+          <input
+            type="text"
+            id="username"
+            value={resetUnm}
+            onChange={(e) => setResetUnm(e.target.value)}
+            required
+          />
           <label htmlFor="phone">Phone number:</label>
           <input
             type="text"

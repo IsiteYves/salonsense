@@ -28,6 +28,20 @@
   color: #333;
 }
 
+.addForm {
+  width: 40%;
+  margin: 2rem;
+}
+
+.addForm input[type="text"] {
+  width: 100% !important;
+  min-width: 400px !important;
+}
+
+.addForm input[type="text"]:focus {
+  border: 1px solid dodgerblue !important;
+}
+
 #addForm button[type="submit"],
 #addForm button {
   width: 100%;

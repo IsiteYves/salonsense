@@ -15,7 +15,7 @@ const formatPrice = (price) => {
   const formatted = `${price}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
   // Combine the dollars and cents with a period
-  return formatted;
+  return `${formatted} Rwf`;
 };
 
 const formatTime = (systemTime) => {
@@ -72,12 +72,15 @@ function Abogoshi() {
   const [nid, setNid] = useState("");
   const [modalIsOpen, setIsOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+  const [percentage, setPercentage] = useState(0);
 
   const fetchAbogoshi = async () => {
     try {
       setBarbLoading(true);
       const response = await axios.get("barbers");
       setAbogoshi(response.data);
+      const res2 = await axios.get("settings");
+      setPercentage(res2.data?.percentage);
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;
@@ -105,7 +108,9 @@ function Abogoshi() {
         alert("Please provide a valid phone number.");
         return;
       }
+      setCreateLoading(true);
       const res = await axios.post("barbers", newBarber);
+      setCreateLoading(false);
       alert("Successfully created!");
       setIsOpen(false);
       const n = [...abogoshi];
@@ -140,6 +145,7 @@ function Abogoshi() {
                 <th>Address</th>
                 <th>NID</th>
                 <th>Balance</th>
+                <th>Registered on</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -163,7 +169,14 @@ function Abogoshi() {
                   >
                     {barber.nid ? barber.nid : "-"}
                   </td>
-                  <td>{formatPrice(barber.balance)} Rwf</td>
+                  <td>
+                    {formatPrice(((100 - percentage) / 100) * barber.balance)}
+                  </td>
+                  <td>
+                    {new Date(barber?.date).toISOString().split("T")[0]}
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    {formatTime(new Date(barber?.date).toISOString())}
+                  </td>
                   <td>
                     <button
                       onClick={() => handleEdit(barber._id)}
@@ -268,7 +281,9 @@ function Abogoshi() {
               onChange={(event) => setNid(event.target.value)}
             />
           </div>
-          <button type="submit">Create Barber</button>
+          <button type="submit">
+            {createLoading ? "Creating barber..." : "Create Barber"}
+          </button>
         </form>
       </Modal>
     </div>
@@ -282,6 +297,8 @@ function Kogosha() {
   const [amount, setAmount] = useState(null);
   const [modalIsOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [percentage, setPercentage] = useState(0);
 
   const fetchAbogoshi = async () => {
     try {
@@ -290,6 +307,13 @@ function Kogosha() {
       setAbogoshi(response.data);
       const res = await axios.get("barbers");
       setOptions(res.data);
+      const res2 = await axios.get("settings");
+      setPercentage(res2.data?.percentage);
+      let tot = 0;
+      for (let dt of response.data) {
+        tot += dt?.amountPaid;
+      }
+      setTotal(tot);
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;
@@ -316,16 +340,17 @@ function Kogosha() {
       };
       setLoading(true);
       await axios.put(`barbers/${barber._id}`, barberUpd);
-      const res = await axios.post("shaves", {
-        barber: barber._id,
-        amountPaid: parseInt(amount),
-      });
       setLoading(false);
       alert("Successfully created!");
       setIsOpen(false);
       const n = [...abogoshi];
-      n.push(res.data);
+      n.push({
+        barber: barber._id,
+        amountPaid: parseInt(amount),
+        date: new Date(),
+      });
       setAbogoshi(n);
+      setTotal(total + parseInt(amount));
       setBarber(null);
       setAmount(null);
     } catch (e) {
@@ -340,14 +365,28 @@ function Kogosha() {
   }, []);
   return (
     <div>
-      <h2>Abogoshwe</h2>
-      <button
-        onClick={async () => {
-          setIsOpen(true);
-        }}
-      >
-        Hogoshwe Umuntu +
-      </button>
+      <h2>Ayavuye mu kogosha</h2>
+      {!barbLoading && (
+        <>
+          <h3>
+            <span style={{ fontWeight: 400 }}>Total yavuye mu kogosha:</span>{" "}
+            {formatPrice(total)}
+          </h3>
+          <h3>
+            <span style={{ fontWeight: 400 }}>
+              Net amount ya saloon (ukuyemo ayo abogoshi bazahembwa):
+            </span>{" "}
+            {formatPrice((total * (100 - percentage)) / 100)}
+          </h3>
+          <button
+            onClick={async () => {
+              setIsOpen(true);
+            }}
+          >
+            Hogoshwe Umuntu +
+          </button>
+        </>
+      )}
       <div>
         {barbLoading ? (
           <p>Loading data...</p>
@@ -366,7 +405,7 @@ function Kogosha() {
                   <td>
                     {options.find((brb) => brb?._id === barber.barber)?.name}
                   </td>
-                  <td>{formatPrice(barber?.amountPaid)} Rwf</td>
+                  <td>{formatPrice(barber?.amountPaid)}</td>
                   <td>
                     {new Date(barber?.date).toISOString().split("T")[0]}
                     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -450,15 +489,19 @@ function AmafarangaAbagoshiBabikuje() {
   const [barber, setBarber] = useState("");
   const [amount, setAmount] = useState(null);
   const [modalIsOpen, setIsOpen] = useState(false);
+  const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [percentage, setPercentage] = useState(0);
 
   const fetchAbogoshi = async () => {
     try {
       setBarbLoading(true);
-      const response = await axios.get("shaves");
+      const response = await axios.get("withdrawals");
       setAbogoshi(response.data);
       const res = await axios.get("barbers");
       setOptions(res.data);
+      const res2 = await axios.get("settings");
+      setPercentage(res2.data?.percentage);
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;
@@ -479,7 +522,7 @@ function AmafarangaAbagoshiBabikuje() {
         alert("Please provide a valid amount of money.");
         return;
       }
-      if (barber?.balance - parseInt(amount) < 0) {
+      if (((100 - percentage) / 100) * barber?.balance - parseInt(amount) < 0) {
         alert("Uyu mwogoshi ntabwo afitemo amafaranga ahagije");
         return;
       }
@@ -489,15 +532,15 @@ function AmafarangaAbagoshiBabikuje() {
       };
       setLoading(true);
       await axios.put(`barbers/${barber._id}`, barberUpd);
-      const res = await axios.post("withdrawals", {
-        barber: barber._id,
-        amount: parseInt(amount),
-      });
       setLoading(false);
       alert("Successfully created!");
       setIsOpen(false);
       const n = [...abogoshi];
-      n.push(res.data);
+      n.push({
+        barber: barber._id,
+        amount: parseInt(amount),
+        date: new Date(),
+      });
       setAbogoshi(n);
       setBarber(null);
       setAmount(null);
@@ -506,14 +549,13 @@ function AmafarangaAbagoshiBabikuje() {
       alert(`Failed to submit data: ${e.message}`);
     }
   };
-  const [options, setOptions] = useState([]);
 
   useEffect(() => {
     fetchAbogoshi();
   }, []);
   return (
     <div>
-      <h2>Abogoshwe</h2>
+      <h2>Amafaranga Abogoshi Bahawe</h2>
       <button
         onClick={async () => {
           setIsOpen(true);
@@ -529,7 +571,7 @@ function AmafarangaAbagoshiBabikuje() {
             <thead>
               <tr>
                 <th>Umwogoshi</th>
-                <th>Amafaranga yamwogosheye</th>
+                <th>Amafaranga yabikuje</th>
                 <th>Itariki</th>
               </tr>
             </thead>
@@ -539,7 +581,7 @@ function AmafarangaAbagoshiBabikuje() {
                   <td>
                     {options.find((brb) => brb?._id === barber.barber)?.name}
                   </td>
-                  <td>{formatPrice(barber?.amountPaid)} Rwf</td>
+                  <td>{formatPrice(barber?.amountPaid)}</td>
                   <td>
                     {new Date(barber?.date).toISOString().split("T")[0]}
                     &nbsp;&nbsp;&nbsp;&nbsp;
@@ -552,7 +594,7 @@ function AmafarangaAbagoshiBabikuje() {
         )}
         {abogoshi.length < 1 && !barbLoading ? (
           <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
-            Nta bakiriya barogoshwa.
+            Nta bogoshi bari babikuza.
           </p>
         ) : (
           ""
@@ -599,7 +641,7 @@ function AmafarangaAbagoshiBabikuje() {
             </select>
           </div>
           <div>
-            <label htmlFor="phone">Amafaranga amwogosheye</label>
+            <label htmlFor="phone">Amafaranga abikuje</label>
             <input
               type="tel"
               id="phone"
@@ -617,6 +659,150 @@ function AmafarangaAbagoshiBabikuje() {
   );
 }
 
+const Settings = () => {
+  const [presets, setPresets] = useState([
+    { name: "Percentage umwogoshi atwara (%)", prop: "percentage" },
+    {
+      name: "Nimero za Admin (Enter the numbers, seperating them with commas)",
+      prop: "adminNumbers",
+    },
+    {
+      name: "Nimero za Cashier (Enter the numbers, seperating them with commas)",
+      prop: "cashierNumbers",
+    },
+  ]);
+  const [loading, setLoading] = useState(false);
+  const [updLoading, setUpdLoading] = useState(false);
+
+  const [settings, setSettings] = useState({
+    percentage: "40",
+    adminNumbers: "",
+    cashierNumbers: "",
+  });
+
+  const fetchSetttings = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("settings");
+      if (
+        !res.data?.percentage ||
+        !res.data?.adminNumbers ||
+        !res.data?.cashierNumbers
+      ) {
+        setLoading(false);
+        return;
+      }
+      const { percentage, adminNumbers, cashierNumbers } = res.data;
+      setSettings({
+        percentage,
+        adminNumbers: adminNumbers.join(","),
+        cashierNumbers: cashierNumbers.join(","),
+      });
+      setLoading(false);
+    } catch (e) {
+      setLoading(false);
+      alert(`Failed to fetch settings: ${e.message}`);
+    }
+  };
+
+  useState(() => {
+    fetchSetttings();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setUpdLoading(true);
+      if (
+        settings.adminNumbers.replace(/,/g, "").length % 10 !== 0 ||
+        settings.cashierNumbers.replace(/,/g, "").length % 10 !== 0
+      ) {
+        alert("All phone numbers must be correct");
+        return;
+      }
+      const ns = {
+        percentage: parseInt(settings.percentage),
+        adminNumbers: settings.adminNumbers.split(","),
+        cashierNumbers: settings.cashierNumbers.split(","),
+      };
+      await axios.put("settings", ns);
+      setUpdLoading(false);
+      alert("Successfully updated settings");
+    } catch (e) {
+      setUpdLoading(false);
+      alert(`Failed to update settings: ${e.message}`);
+    }
+  };
+  return (
+    <div>
+      <h2>Settings</h2>
+      <button
+        style={{
+          background: "red",
+          color: "#fff",
+          fontWeight: "bold",
+          borderRadius: "5px",
+          border: "none",
+          cursor: "pointer",
+          marginLeft: "4rem",
+        }}
+        onClick={async () => {
+          try {
+            if (
+              !window.confirm(
+                "Are you sure you want to delete all data? This action is irreversible"
+              )
+            )
+              return;
+            await axios.delete("admin");
+            alert("Cleared all data successfully.");
+          } catch (e) {
+            alert(`Failed to delete all data: ${e.message}`);
+          }
+        }}
+      >
+        Gusiba data zose (Abogoshi, Abogoshwe, Ayabikujwe)
+      </button>
+      <form
+        onSubmit={handleSubmit}
+        style={addForm}
+        id="addForm"
+        className="addForm"
+      >
+        {loading && <p>Loading settings...</p>}
+        {!loading && (
+          <>
+            {presets.map((preset) => (
+              <div>
+                <label htmlFor={preset.prop}>{preset.name}</label>
+                <input
+                  type="text"
+                  id={preset.prop}
+                  value={settings[preset.prop]}
+                  placeholder="Type here..."
+                  onChange={(event) =>
+                    setSettings({
+                      ...settings,
+                      [preset.prop]: event.target.value.trim(),
+                    })
+                  }
+                  required={
+                    preset.prop !== "adminNumbers" &&
+                    preset.prop !== "cashierNumbers"
+                  }
+                />
+              </div>
+            ))}
+            <button type="submit">
+              {updLoading ? "Updating Settings..." : "Update Settings"}
+            </button>
+          </>
+        )}
+      </form>
+    </div>
+  );
+};
+
 function Dashboard() {
   const navigate = useNavigate();
   useEffect(() => {
@@ -633,12 +819,15 @@ function Dashboard() {
             <Link to="/abogoshi">Abogoshi</Link>
           </li>
           <li>
-            <Link to="/kogosha">Abagoshwe</Link>
+            <Link to="/kogosha">Ayavuye mu kogosha</Link>
           </li>
           <li>
             <Link to="/amafaranga-abagoshi-babikuje">
-              Amafaranga abagoshi babikuje
+              Amafaranga abagoshi bahawe
             </Link>
+          </li>
+          <li>
+            <Link to="/settings">Settings</Link>
           </li>
           <li
             onClick={() => {
@@ -655,6 +844,7 @@ function Dashboard() {
           <Route path="/" element={<Navigate to="abogoshi" />} />
           <Route path="/abogoshi" exact element={<Abogoshi />} />
           <Route path="/kogosha" exact element={<Kogosha />} />
+          <Route path="/settings" exact element={<Settings />} />
           <Route
             path="/amafaranga-abagoshi-babikuje"
             element={<AmafarangaAbagoshiBabikuje />}

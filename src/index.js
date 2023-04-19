@@ -8,7 +8,7 @@ import axios from "axios";
 
 axios.interceptors.request.use((request) => {
   let apiUrl = request.url;
-  request.url = `http://localhost:5000/api/v1/${apiUrl}`;
+  request.url = `https://barber-ben.onrender.com/api/v1/${apiUrl}`;
   if (localStorage.getItem("token")) {
     request.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
   }

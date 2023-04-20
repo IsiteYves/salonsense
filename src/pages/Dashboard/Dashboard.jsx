@@ -49,6 +49,7 @@ const customStyles = {
 const addForm = {};
 
 function Abogoshi() {
+  document.title = "Abogoshi";
   const [abakozi, setAbakozi] = useState([...options]);
 
   const handleEdit = (barber) => {
@@ -304,6 +305,7 @@ function Abogoshi() {
 }
 
 function Kogosha() {
+  document.title = "Amafaranga yavuye mu kogosha";
   const [abogoshi, setAbogoshi] = useState([]);
   const [barbLoading, setBarbLoading] = useState(false);
   const [barber, setBarber] = useState("");
@@ -494,6 +496,7 @@ function Kogosha() {
 }
 
 function AmafarangaAbagoshiBabikuje() {
+  document.title = "Amafaranga Abagoshi Bahawe";
   const [abogoshi, setAbogoshi] = useState([]);
   const [barbLoading, setBarbLoading] = useState(false);
   const [barber, setBarber] = useState("");

@@ -48,6 +48,8 @@ const DashboardStyled = styled.div`
   .main-content > div:first-of-type h2 {
     color: #6622b4;
     position: sticky;
+    font-weight: 700 !important;
+    font-size: 20px !important;
     top: 0;
     box-shadow: 0 0 15px #808080;
     z-index: 9999;
@@ -77,6 +79,14 @@ const DashboardStyled = styled.div`
   .main-content > div:first-of-type > button {
     margin: 2rem 0 0 2rem;
     font-weight: 700;
+    border-radius: 3px;
+    padding: 10px 15px;
+    color: #fff;
+    transition: all 0.5s ease;
+    background: rgb(11, 95, 179);
+  }
+  .main-content > div:first-of-type > button:hover {
+    background: dodgerblue;
   }
 `;
 

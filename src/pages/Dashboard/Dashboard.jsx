@@ -52,7 +52,7 @@ const addForm = {};
 
 function Abogoshi() {
   document.title = "Abogoshi";
-  const [abakozi, setAbakozi] = useState([...options]);
+  const [abakozi, setAbakozi] = useState([]);
 
   const handleEdit = (barber) => {
     setEditMode(true);
@@ -78,7 +78,6 @@ function Abogoshi() {
     } catch (e) {
       alert(`Failed to delete data: ${e.message}.Please try again.`);
     }
-    console.log(`Delete clicked for barber with ID ${barberId}`);
   };
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -88,6 +87,7 @@ function Abogoshi() {
   const [createLoading, setCreateLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editUsr, setEditUsr] = useState(null);
+  const [barbLoading, setBarbLoading] = useState(true);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -133,83 +133,109 @@ function Abogoshi() {
       alert(`Failed to submit data: ${e.message}`);
     }
   };
+
+  const fetchDt = async () => {
+    try {
+      setBarbLoading(true);
+      const res = await axios.get("barbers");
+      options = res.data;
+      setAbakozi(res.data);
+      setBarbLoading(false);
+    } catch (e) {
+      const { response } = e;
+      if (response.status === 400) {
+        alert("Network Error");
+      } else {
+        alert("Please refresh the page.");
+      }
+      setBarbLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDt();
+  }, []);
   return (
     <div>
       <h2>Abogoshi</h2>
       <button onClick={() => setIsOpen(true)}>Umwogoshi Mushya +</button>
       <div>
-        <table>
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Name</th>
-              <th>Phone</th>
-              <th>Address</th>
-              <th>NID</th>
-              <th>Balance</th>
-              <th>Registered on</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {abakozi.map((barber, i) => (
-              <tr key={barber._id}>
-                <td>{i + 1}</td>
-                <td>{barber.name}</td>
-                <td>{barber.phone}</td>
-                <td
-                  style={{
-                    textAlign: barber.address ? "left" : "center",
-                  }}
-                >
-                  {barber.address ? barber.address : "-"}
-                </td>
-                <td
-                  style={{
-                    textAlign: barber.nid ? "left" : "center",
-                  }}
-                >
-                  {barber.nid ? barber.nid : "-"}
-                </td>
-                <td>{formatPrice((percentage / 100) * barber.balance)}</td>
-                <td>
-                  {new Date(barber?.date).toISOString().split("T")[0]}
-                  &nbsp;&nbsp;&nbsp;&nbsp;
-                  {formatTime(new Date(barber?.date).toISOString())}
-                </td>
-                <td>
-                  <button
-                    onClick={() => handleEdit(barber)}
-                    style={{
-                      padding: "6px 14px",
-                      background: "green",
-                      color: "#fff",
-                      border: "none",
-                      outline: "none",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Edit
-                  </button>{" "}
-                  |{" "}
-                  <button
-                    onClick={() => handleDelete(barber._id)}
-                    style={{
-                      padding: "6px 14px",
-                      background: "red",
-                      color: "#fff",
-                      border: "none",
-                      outline: "none",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Delete
-                  </button>
-                </td>
+        {barbLoading ? (
+          <p>Loading datum...</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>NID</th>
+                <th>Balance</th>
+                <th>Registered on</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {abakozi.map((barber, i) => (
+                <tr key={barber._id}>
+                  <td>{i + 1}</td>
+                  <td>{barber.name}</td>
+                  <td>{barber.phone}</td>
+                  <td
+                    style={{
+                      textAlign: barber.address ? "left" : "center",
+                    }}
+                  >
+                    {barber.address ? barber.address : "-"}
+                  </td>
+                  <td
+                    style={{
+                      textAlign: barber.nid ? "left" : "center",
+                    }}
+                  >
+                    {barber.nid ? barber.nid : "-"}
+                  </td>
+                  <td>{formatPrice((percentage / 100) * barber.balance)}</td>
+                  <td>
+                    {new Date(barber?.date).toISOString().split("T")[0]}
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    {formatTime(new Date(barber?.date).toISOString())}
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => handleEdit(barber)}
+                      style={{
+                        padding: "6px 14px",
+                        background: "green",
+                        color: "#fff",
+                        border: "none",
+                        outline: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Edit
+                    </button>{" "}
+                    |{" "}
+                    <button
+                      onClick={() => handleDelete(barber._id)}
+                      style={{
+                        padding: "6px 14px",
+                        background: "red",
+                        color: "#fff",
+                        border: "none",
+                        outline: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
         {options.length < 1 ? (
           <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
             Nta bogoshi bahari ubu.
@@ -309,16 +335,37 @@ function Abogoshi() {
 function Kogosha() {
   document.title = "Amafaranga yavuye mu kogosha";
   const [abogoshi, setAbogoshi] = useState([]);
+  const [shownAbogoshi, setShownAbogoshi] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [barbLoading, setBarbLoading] = useState(false);
   const [barber, setBarber] = useState("");
   const [amount, setAmount] = useState(null);
   const [modalIsOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
-  const [showFilter, setShowFilter] = useState(false);
+  const [dtFilter, setDtFilter] = useState(false);
 
   const handleSelect = (range) => {
-    console.log(range);
+    try {
+      const { startDate, endDate } = range?.selection;
+      const mills1 = startDate
+        ? new Date(startDate).getTime()
+        : new Date().getTime();
+      const mills2 = endDate
+        ? new Date(endDate).getTime()
+        : new Date().getTime();
+      const newRows = [];
+      for (let i = 0; i < abogoshi.length; i++) {
+        const currDateMills = new Date(abogoshi[i][`${186}`]).getTime();
+        if (currDateMills >= mills1 && currDateMills <= mills2) {
+          newRows.push(abogoshi[i]);
+        }
+      }
+      setFiltered(true);
+      setShownAbogoshi(newRows);
+    } catch (e) {
+      console.log(e?.message);
+    }
   };
 
   const selectionRange = {
@@ -332,6 +379,7 @@ function Kogosha() {
       setBarbLoading(true);
       const response = await axios.get("shaves");
       setAbogoshi(response.data);
+      setShownAbogoshi(response.data);
       let tot = 0;
       for (let dt of response.data) {
         tot += dt?.amountPaid;
@@ -373,6 +421,7 @@ function Kogosha() {
         date: new Date(),
       });
       setAbogoshi(n);
+      setShownAbogoshi(n);
       setTotal(total + parseInt(amount));
       setBarber(null);
       setAmount(null);
@@ -392,20 +441,30 @@ function Kogosha() {
         <>
           <FormControl display="flex" alignItems="center">
             <FormLabel htmlFor="email-alerts" mb="0">
-              Enable email alerts?
+              Toggle Date Filter
             </FormLabel>
-            <Switch id="email-alerts" />
+            <Switch
+              id="email-alerts"
+              onChange={() => {
+                setDtFilter(!dtFilter);
+              }}
+            />
           </FormControl>
-          <DateRangePicker ranges={[selectionRange]} onChange={handleSelect} />
+          {dtFilter && (
+            <DateRangePicker
+              ranges={[selectionRange]}
+              onChange={handleSelect}
+            />
+          )}
           <h3>
-            <span style={{ fontWeight: 400 }}>Total yavuye mu kogosha:</span>{" "}
-            {formatPrice(total)}
+            Total yavuye mu kogosha:{" "}
+            <span style={{ fontWeight: 700 }}>{formatPrice(total)}</span>
           </h3>
           <h3>
-            <span style={{ fontWeight: 400 }}>
-              Net amount ya saloon (ukuyemo ayo abogoshi bazahembwa):
-            </span>{" "}
-            {formatPrice((total * (100 - percentage)) / 100)}
+            Net amount ya saloon (ukuyemo ayo abogoshi bazahembwa):{" "}
+            <span style={{ fontWeight: 700 }}>
+              {formatPrice((total * (100 - percentage)) / 100)}
+            </span>
           </h3>
           <button
             onClick={async () => {
@@ -429,7 +488,7 @@ function Kogosha() {
               </tr>
             </thead>
             <tbody>
-              {abogoshi.map((barber) => (
+              {shownAbogoshi.map((barber) => (
                 <tr key={barber._id}>
                   <td>
                     {options.find((brb) => brb?._id === barber.barber)?.name}
@@ -447,7 +506,9 @@ function Kogosha() {
         )}
         {abogoshi.length < 1 && !barbLoading ? (
           <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
-            Nta bakiriya barogoshwa.
+            {filtered
+              ? "Nta bakiriya bogoshwe hagati y'ayo matariki uhisemo."
+              : "Nta bakiriya barogoshwa."}
           </p>
         ) : (
           ""
@@ -872,9 +933,6 @@ function Dashboard() {
     document.body.style.backgroundColor = "#fff";
     calc();
   }, []);
-  useEffect(() => {
-    console.log("role..", role);
-  }, [role]);
   return (
     <DashboardStyled>
       <div className="sidebar">

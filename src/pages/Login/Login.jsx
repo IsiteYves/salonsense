@@ -18,6 +18,7 @@ const Login = () => {
   const [cCode, setCCode] = useState(false);
   const [newpassword, setNewPassword] = useState("");
   const [newpasswordC, setNewPasswordC] = useState("");
+  document.title = "Welcome to Saloon Manager";
 
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);

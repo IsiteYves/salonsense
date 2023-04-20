@@ -5,12 +5,14 @@ import DashboardStyled from "./DashboardStyled";
 import Modal from "react-modal";
 import jwt_decode from "jwt-decode";
 import axios from "axios";
+import { DateRangePicker } from "react-date-range";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
+import { FormControl, FormLabel, Switch } from "@chakra-ui/react";
 
 const formatPrice = (price) => {
   // Check if price is a valid number
-  if (isNaN(price)) {
-    return "";
-  }
+  if (isNaN(price)) return "";
 
   // Insert commas every 3 digits in the dollars portion
   const formatted = `${price}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -313,6 +315,17 @@ function Kogosha() {
   const [modalIsOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
+  const [showFilter, setShowFilter] = useState(false);
+
+  const handleSelect = (range) => {
+    console.log(range);
+  };
+
+  const selectionRange = {
+    startDate: new Date("2023-04-18"),
+    endDate: new Date(),
+    key: "selection",
+  };
 
   const fetchAbogoshi = async () => {
     try {
@@ -377,6 +390,13 @@ function Kogosha() {
       <h2>Ayavuye mu kogosha</h2>
       {!barbLoading && (
         <>
+          <FormControl display="flex" alignItems="center">
+            <FormLabel htmlFor="email-alerts" mb="0">
+              Enable email alerts?
+            </FormLabel>
+            <Switch id="email-alerts" />
+          </FormControl>
+          <DateRangePicker ranges={[selectionRange]} onChange={handleSelect} />
           <h3>
             <span style={{ fontWeight: 400 }}>Total yavuye mu kogosha:</span>{" "}
             {formatPrice(total)}

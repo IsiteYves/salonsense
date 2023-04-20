@@ -36,7 +36,13 @@ const DashboardStyled = styled.div`
     text-decoration: none;
     color: #fff;
   }
-  .main-content {
+  .main-content > div:first-of-type {
+    overflow-y: auto !important;
+    max-height: 100vh !important;
+  }
+  .main-content,
+  .main-content > div:first-of-type,
+  table {
     width: 100%;
   }
   .main-content > div:first-of-type h2 {
@@ -44,15 +50,12 @@ const DashboardStyled = styled.div`
     position: sticky;
     top: 0;
     box-shadow: 0 0 15px #808080;
+    z-index: 9999;
   }
   .main-content > div:first-of-type > * {
     padding: 1rem 2rem;
   }
-  .main-content > div:first-of-type {
-    width: 100%;
-  }
   table {
-    width: 100%;
     border-collapse: collapse;
     font-family: Arial, sans-serif;
     font-size: 14px;

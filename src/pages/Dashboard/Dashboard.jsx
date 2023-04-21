@@ -8,7 +8,18 @@ import axios from "axios";
 import { DateRangePicker } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
-import { FormControl, FormLabel, Switch } from "@chakra-ui/react";
+import {
+  Flex,
+  FormControl,
+  FormLabel,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  InputRightElement,
+  Spacer,
+  Switch,
+} from "@chakra-ui/react";
+import { SearchIcon, SmallCloseIcon } from "@chakra-ui/icons";
 
 const formatPrice = (price) => {
   // Check if price is a valid number
@@ -344,6 +355,23 @@ function Kogosha() {
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [dtFilter, setDtFilter] = useState(false);
+  const [searchKey, setSearchKey] = useState("");
+
+  const onSearch = (value) => {
+    if (value !== searchKey) setSearchKey(value);
+    const results = [];
+    for (let row of abogoshi) {
+      if (
+        `${options.find((brb) => brb?._id === row?.barber)?.name}`
+          .toLowerCase()
+          .includes(value.toLowerCase())
+      ) {
+        if (!results.find((result) => result === row)) results.push(row);
+      }
+    }
+
+    setShownAbogoshi(results);
+  };
 
   const handleSelect = (range) => {
     try {
@@ -470,13 +498,40 @@ function Kogosha() {
               {formatPrice((total * (100 - percentage)) / 100)}
             </span>
           </h3>
-          <button
-            onClick={async () => {
-              setIsOpen(true);
-            }}
-          >
-            Hogoshwe Umuntu +
-          </button>
+          <Flex>
+            <button
+              onClick={async () => {
+                setIsOpen(true);
+              }}
+            >
+              Hogoshwe Umuntu +
+            </button>
+            <Spacer />
+            <InputGroup width={300}>
+              <InputLeftElement
+                pointerEvents="none"
+                children={<SearchIcon color="gray.300" />}
+              />
+              <Input
+                type="text"
+                value={searchKey}
+                onChange={(e) => onSearch(e?.target?.value)}
+                placeholder="Search..."
+              />
+              <InputRightElement
+                pointerEvents="all"
+                children={
+                  <SmallCloseIcon
+                    color="gray.500"
+                    onClick={() => {
+                      setSearchKey("");
+                      setShownAbogoshi(abogoshi);
+                    }}
+                  />
+                }
+              />
+            </InputGroup>
+          </Flex>
         </>
       )}
       <div>

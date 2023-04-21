@@ -77,8 +77,7 @@ const DashboardStyled = styled.div`
     padding: 10px;
     border: 1px solid #ddd;
   }
-  .main-content > div:first-of-type > button {
-    margin: 2rem 0 0 2rem;
+  .main-content > div:first-of-type > * > button {
     font-weight: 700;
     border-radius: 3px;
     padding: 10px 15px;
@@ -86,7 +85,7 @@ const DashboardStyled = styled.div`
     transition: all 0.5s ease;
     background: rgb(11, 95, 179);
   }
-  .main-content > div:first-of-type > button:hover {
+  .main-content > div:first-of-type > * > button:hover {
     background: dodgerblue;
   }
 `;

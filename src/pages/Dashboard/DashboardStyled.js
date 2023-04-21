@@ -77,6 +77,10 @@ const DashboardStyled = styled.div`
     padding: 10px;
     border: 1px solid #ddd;
   }
+  .main-content > div:first-of-type > button {
+    margin: 2rem 0 0 2rem;
+  }
+  .main-content > div:first-of-type > button,
   .main-content > div:first-of-type > * > button {
     font-weight: 700;
     border-radius: 3px;

@@ -34,7 +34,8 @@
 }
 
 .addForm {
-  width: 40%;
+  width: 42.5% !important;
+  min-width: 450px !important;
   margin: 2rem;
 }
 

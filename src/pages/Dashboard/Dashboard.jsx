@@ -462,7 +462,7 @@ function Kogosha() {
             <span style={{ fontWeight: 700 }}>{formatPrice(total)}</span>
           </h3>
           <h3>
-            Net amount ya saloon (ukuyemo ayo abogoshi bazahembwa):{" "}
+            Net amount ya saloon (ukuyemo ayo abogoshi bahembwa/bazahembwa):{" "}
             <span style={{ fontWeight: 700 }}>
               {formatPrice((total * (100 - percentage)) / 100)}
             </span>
@@ -774,6 +774,7 @@ const Settings = () => {
     adminNumbers: "",
     cashierNumbers: "",
   });
+  const [initSets, setInitSets] = useState(null);
 
   const fetchSetttings = async () => {
     try {
@@ -793,6 +794,11 @@ const Settings = () => {
         adminNumbers: adminNumbers.join(","),
         cashierNumbers: cashierNumbers.join(","),
       });
+      setInitSets({
+        percentage,
+        adminNumbers: adminNumbers.join(","),
+        cashierNumbers: cashierNumbers.join(","),
+      });
       setLoading(false);
     } catch (e) {
       setLoading(false);
@@ -807,6 +813,14 @@ const Settings = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      if (
+        settings.percentage === initSets.percentage &&
+        settings.adminNumbers === initSets.adminNumbers &&
+        settings.cashierNumbers === initSets.cashierNumbers
+      ) {
+        alert("No changes made");
+        return;
+      }
       setUpdLoading(true);
       if (
         settings.adminNumbers.replace(/,/g, "").length % 10 !== 0 ||

@@ -614,6 +614,8 @@ function AmafarangaAbagoshiBabikuje() {
         alert("Uyu mwogoshi ntabwo afitemo amafaranga ahagije");
         return;
       }
+      if (!window.confirm("Confirm withdrawal?")) return;
+
       const barberUpd = {
         ...barber,
         balance: barber.balance - (100 * parseInt(amount)) / percentage,

@@ -161,7 +161,7 @@ function Abogoshi() {
       <button onClick={() => setIsOpen(true)}>Umwogoshi Mushya +</button>
       <div>
         {barbLoading ? (
-          <p>Loading datum...</p>
+          <p>Loading data...</p>
         ) : (
           <table>
             <thead>
@@ -616,7 +616,7 @@ function AmafarangaAbagoshiBabikuje() {
       }
       const barberUpd = {
         ...barber,
-        balance: barber.balance - parseInt(amount),
+        balance: barber.balance - (100 * parseInt(amount)) / percentage,
       };
       setLoading(true);
       await axios.put(`barbers/${barber._id}`, barberUpd);

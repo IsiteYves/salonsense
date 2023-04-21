@@ -48,11 +48,12 @@ const DashboardStyled = styled.div`
   .main-content > div:first-of-type h2 {
     color: #6622b4;
     position: sticky;
+    background-color: #fff;
     font-weight: 700 !important;
     font-size: 20px !important;
     top: 0;
     box-shadow: 0 0 15px #808080;
-    z-index: 9999;
+    z-index: 99 !important;
   }
   .main-content > div:first-of-type > * {
     padding: 1rem 2rem;

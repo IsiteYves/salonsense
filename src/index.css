@@ -4,6 +4,11 @@
   box-sizing: border-box;
 }
 
+#addForm {
+  position: relative !important;
+  z-index: 8000 !important;
+}
+
 #addForm label {
   display: block;
   margin-bottom: 5px;

@@ -669,7 +669,7 @@ function AmafarangaAbagoshiBabikuje() {
                   <td>
                     {options.find((brb) => brb?._id === barber.barber)?.name}
                   </td>
-                  <td>{formatPrice(barber?.amountPaid)}</td>
+                  <td>{formatPrice(barber?.amount)}</td>
                   <td>
                     {new Date(barber?.date).toISOString().split("T")[0]}
                     &nbsp;&nbsp;&nbsp;&nbsp;

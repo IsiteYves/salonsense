@@ -348,19 +348,16 @@ function Kogosha() {
   const handleSelect = (range) => {
     try {
       const { startDate, endDate } = range?.selection;
-      const mills1 = startDate
-        ? new Date(startDate).getTime()
-        : new Date().getTime();
-      const mills2 = endDate
-        ? new Date(endDate).getTime()
-        : new Date().getTime();
+      const mills1 = new Date(startDate).getTime();
+      const mills2 = new Date(endDate).getTime() + 86400000;
       const newRows = [];
       for (let i = 0; i < abogoshi.length; i++) {
-        const currDateMills = new Date(abogoshi[i][`${186}`]).getTime();
+        const currDateMills = new Date(abogoshi[i]?.date).getTime();
         if (currDateMills >= mills1 && currDateMills <= mills2) {
           newRows.push(abogoshi[i]);
         }
       }
+      console.log(newRows, startDate, endDate);
       setFiltered(true);
       setShownAbogoshi(newRows);
     } catch (e) {
@@ -440,22 +437,26 @@ function Kogosha() {
       <h2>Ayavuye mu kogosha</h2>
       {!barbLoading && (
         <>
-          <FormControl display="flex" alignItems="center">
-            <FormLabel htmlFor="email-alerts" mb="0">
-              Toggle Date Filter
-            </FormLabel>
-            <Switch
-              id="email-alerts"
-              onChange={() => {
-                setDtFilter(!dtFilter);
-              }}
-            />
-          </FormControl>
-          {dtFilter && (
-            <DateRangePicker
-              ranges={[selectionRange]}
-              onChange={handleSelect}
-            />
+          {abogoshi.length > 0 && (
+            <>
+              <FormControl display="flex" alignItems="center">
+                <FormLabel htmlFor="email-alerts" mb="0">
+                  Toggle Date Filter
+                </FormLabel>
+                <Switch
+                  id="email-alerts"
+                  onChange={() => {
+                    setDtFilter(!dtFilter);
+                  }}
+                />
+              </FormControl>
+              {dtFilter && (
+                <DateRangePicker
+                  ranges={[selectionRange]}
+                  onChange={handleSelect}
+                />
+              )}
+            </>
           )}
           <h3>
             Total yavuye mu kogosha:{" "}
@@ -505,7 +506,7 @@ function Kogosha() {
             </tbody>
           </table>
         )}
-        {abogoshi.length < 1 && !barbLoading ? (
+        {shownAbogoshi.length < 1 && !barbLoading ? (
           <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
             {filtered
               ? "Nta bakiriya bogoshwe hagati y'ayo matariki uhisemo."

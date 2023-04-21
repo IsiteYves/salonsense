@@ -357,7 +357,6 @@ function Kogosha() {
           newRows.push(abogoshi[i]);
         }
       }
-      console.log(newRows, startDate, endDate);
       setFiltered(true);
       setShownAbogoshi(newRows);
     } catch (e) {
@@ -377,11 +376,6 @@ function Kogosha() {
       const response = await axios.get("shaves");
       setAbogoshi(response.data);
       setShownAbogoshi(response.data);
-      let tot = 0;
-      for (let dt of response.data) {
-        tot += dt?.amountPaid;
-      }
-      setTotal(tot);
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;
@@ -393,6 +387,14 @@ function Kogosha() {
       setBarbLoading(false);
     }
   };
+
+  useEffect(() => {
+    let tot = 0;
+    for (let dt of shownAbogoshi) {
+      tot += dt?.amountPaid;
+    }
+    setTotal(tot);
+  }, [shownAbogoshi]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();

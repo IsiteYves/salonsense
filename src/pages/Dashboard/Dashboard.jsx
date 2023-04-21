@@ -405,6 +405,7 @@ function Kogosha() {
         alert("Please provide a valid amount of money.");
         return;
       }
+      if (!window.confirm("Confirm?")) return;
       const barberUpd = {
         ...barber,
         balance: barber.balance + parseInt(amount),
@@ -754,7 +755,7 @@ function AmafarangaAbagoshiBabikuje() {
 }
 
 const Settings = () => {
-  const [presets, setPresets] = useState([
+  const presets = [
     { name: "Percentage umwogoshi atwara (%)", prop: "percentage" },
     {
       name: "Nimero za Admin (Enter the numbers, seperating them with commas)",
@@ -764,7 +765,7 @@ const Settings = () => {
       name: "Nimero za Cashier (Enter the numbers, seperating them with commas)",
       prop: "cashierNumbers",
     },
-  ]);
+  ];
   const [loading, setLoading] = useState(false);
   const [updLoading, setUpdLoading] = useState(false);
 
@@ -821,6 +822,7 @@ const Settings = () => {
       };
       await axios.put("settings", ns);
       setUpdLoading(false);
+      percentage = ns.percentage;
       alert("Successfully updated settings");
     } catch (e) {
       setUpdLoading(false);

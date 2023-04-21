@@ -113,6 +113,10 @@ function Abogoshi() {
         alert("Please provide a valid phone number.");
         return;
       }
+      if (nid.length !== 16 || isNaN(parseInt(nid))) {
+        alert("Please provide a valid NID number.");
+        return;
+      }
       setCreateLoading(true);
       if (editMode) {
         await axios.put(`barbers/${editUsr?._id}`, newBarber);
@@ -242,7 +246,7 @@ function Abogoshi() {
             </tbody>
           </table>
         )}
-        {abakozi.length < 1 ? (
+        {abakozi.length < 1 && !barbLoading ? (
           <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
             Nta bogoshi bahari ubu.
           </p>
@@ -374,10 +378,11 @@ function Kogosha() {
       const mills1 = new Date(startDate).getTime();
       const mills2 = new Date(endDate).getTime() + 86400000;
       const newRows = [];
-      for (let i = 0; i < shownAbogoshi.length; i++) {
-        const currDateMills = new Date(shownAbogoshi[i]?.date).getTime();
+      const dtSet = searchKey ? shownAbogoshi : abogoshi;
+      for (let i = 0; i < dtSet.length; i++) {
+        const currDateMills = new Date(dtSet[i]?.date).getTime();
         if (currDateMills >= mills1 && currDateMills <= mills2) {
-          newRows.push(shownAbogoshi[i]);
+          newRows.push(dtSet[i]);
         }
       }
       setFiltered(true);
@@ -441,13 +446,20 @@ function Kogosha() {
       setLoading(false);
       alert("Successfully created!");
       setIsOpen(false);
+      const m = [...options];
+      m.map((brb) => {
+        if (brb._id === barber._id) {
+          brb.balance = barberUpd.balance;
+        }
+        return brb;
+      });
+      setOptions(m);
       const n = [...abogoshi];
       n.push({
         barber: barber._id,
         amountPaid: parseInt(amount),
         date: new Date(),
       });
-      options = n;
       setAbogoshi(n);
       setShownAbogoshi(n);
       setTotal(total + parseInt(amount));

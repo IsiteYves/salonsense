@@ -550,7 +550,13 @@ function Kogosha() {
               {shownAbogoshi.map((barber) => (
                 <tr key={barber._id}>
                   <td>
-                    {options.find((brb) => brb?._id === barber.barber)?.name}
+                    {options.find((brb) => brb?._id === barber.barber)?.name ? (
+                      options.find((brb) => brb?._id === barber.barber)?.name
+                    ) : (
+                      <span style={{ color: "orange" }}>
+                        [Uyu mwogoshi mwamusibye muri system]
+                      </span>
+                    )}
                   </td>
                   <td>{formatPrice(barber?.amountPaid)}</td>
                   <td>
@@ -728,7 +734,13 @@ function AmafarangaAbagoshiBabikuje() {
               {abogoshi.map((barber) => (
                 <tr key={barber._id}>
                   <td>
-                    {options.find((brb) => brb?._id === barber.barber)?.name}
+                    {options.find((brb) => brb?._id === barber.barber)?.name ? (
+                      options.find((brb) => brb?._id === barber.barber)?.name
+                    ) : (
+                      <span style={{ color: "orange" }}>
+                        [Uyu mwogoshi mwamusibye muri system]
+                      </span>
+                    )}
                   </td>
                   <td>{formatPrice(barber?.amount)}</td>
                   <td>

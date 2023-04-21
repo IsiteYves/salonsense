@@ -379,7 +379,7 @@ function Kogosha() {
       const mills1 = new Date(startDate).getTime();
       const mills2 = new Date(endDate).getTime() + 86400000;
       const newRows = [];
-      for (let i = 0; i < abogoshi.length; i++) {
+      for (let i = 0; i < shownAbogoshi.length; i++) {
         const currDateMills = new Date(abogoshi[i]?.date).getTime();
         if (currDateMills >= mills1 && currDateMills <= mills2) {
           newRows.push(abogoshi[i]);

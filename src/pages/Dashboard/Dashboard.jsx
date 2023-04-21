@@ -43,7 +43,6 @@ const formatTime = (systemTime) => {
 };
 
 let percentage = 0;
-let options = [];
 
 Modal.setAppElement("#root");
 const customStyles = {
@@ -82,9 +81,8 @@ function Abogoshi() {
       if (window.confirm("Are you sure you want to delete this barber?")) {
         await axios.delete(`barbers/${barberId}`);
         alert("Successfully deleted.");
-        const n = options.filter((umwogoshi) => umwogoshi._id !== barberId);
+        const n = abakozi.filter((umwogoshi) => umwogoshi._id !== barberId);
         setAbakozi(n);
-        options = n;
       }
     } catch (e) {
       alert(`Failed to delete data: ${e.message}.Please try again.`);
@@ -124,13 +122,11 @@ function Abogoshi() {
           }
           return umukozi;
         });
-        options = n;
         setAbakozi(n);
       } else {
         const res = await axios.post("barbers", newBarber);
-        const n = [...options];
+        const n = [...abakozi];
         n.push(res.data);
-        options = n;
         setAbakozi(n);
       }
       alert(`Successfully ${editMode ? "updated" : "created"}!`);
@@ -149,7 +145,6 @@ function Abogoshi() {
     try {
       setBarbLoading(true);
       const res = await axios.get("barbers");
-      options = res.data;
       setAbakozi(res.data);
       setBarbLoading(false);
     } catch (e) {
@@ -247,7 +242,7 @@ function Abogoshi() {
             </tbody>
           </table>
         )}
-        {options.length < 1 ? (
+        {abakozi.length < 1 ? (
           <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
             Nta bogoshi bahari ubu.
           </p>
@@ -392,6 +387,8 @@ function Kogosha() {
     }
   };
 
+  const [options, setOptions] = useState([]);
+
   const selectionRange = {
     startDate: new Date("2023-04-18"),
     endDate: new Date(),
@@ -404,6 +401,8 @@ function Kogosha() {
       const response = await axios.get("shaves");
       setAbogoshi(response.data);
       setShownAbogoshi(response.data);
+      const res = await axios.get("barbers");
+      setOptions(res.data);
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;
@@ -448,6 +447,7 @@ function Kogosha() {
         amountPaid: parseInt(amount),
         date: new Date(),
       });
+      options = n;
       setAbogoshi(n);
       setShownAbogoshi(n);
       setTotal(total + parseInt(amount));
@@ -649,12 +649,15 @@ function AmafarangaAbagoshiBabikuje() {
   const [amount, setAmount] = useState(null);
   const [modalIsOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [options, setOptions] = useState([]);
 
   const fetchAbogoshi = async () => {
     try {
       setBarbLoading(true);
       const response = await axios.get("withdrawals");
       setAbogoshi(response.data);
+      const res = await axios.get("barbers");
+      setOptions(res.data);
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;
@@ -690,6 +693,14 @@ function AmafarangaAbagoshiBabikuje() {
       setLoading(false);
       alert("Successfully created!");
       setIsOpen(false);
+      const m = [...options];
+      m.map((brb) => {
+        if (brb._id === barber._id) {
+          brb.balance = barberUpd.balance;
+        }
+        return brb;
+      });
+      setOptions(m);
       const n = [...abogoshi];
       n.push({
         barber: barber._id,
@@ -990,8 +1001,6 @@ function Dashboard() {
       setBarbLoading(true);
       const res2 = await axios.get("settings");
       percentage = res2.data?.percentage;
-      const res = await axios.get("barbers");
-      options = res.data;
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;

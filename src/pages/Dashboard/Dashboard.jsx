@@ -109,7 +109,7 @@ function Abogoshi() {
       balance: editUsr?.balance,
     };
     try {
-      if (phone && (phone.length !== 10 || isNaN(parseInt(phone)))) {
+      if (phone.length !== 10 || isNaN(parseInt(phone))) {
         alert("Please provide a valid phone number.");
         return;
       }

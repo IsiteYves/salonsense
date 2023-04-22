@@ -89,6 +89,7 @@ const DashboardStyled = styled.div`
     transition: all 0.5s ease;
     background: rgb(11, 95, 179);
   }
+  .main-content > div:first-of-type > button:hover,
   .main-content > div:first-of-type > * > button:hover {
     background: dodgerblue;
   }

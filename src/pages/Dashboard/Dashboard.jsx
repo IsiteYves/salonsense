@@ -346,7 +346,7 @@ function Kogosha() {
   document.title = "Amafaranga yavuye mu kogosha";
   const [abogoshi, setAbogoshi] = useState([]);
   const [shownAbogoshi, setShownAbogoshi] = useState([]);
-  const [filtered, setFiltered] = useState([]);
+  const [filtered, setFiltered] = useState(false);
   const [barbLoading, setBarbLoading] = useState(false);
   const [barber, setBarber] = useState("");
   const [amount, setAmount] = useState(null);

@@ -46,6 +46,12 @@ const formatTime = (systemTime) => {
   return `${hours % 12}:${minutes < 10 ? "0" + minutes : minutes} ${ampm}`;
 };
 
+const getStdDate = (dt) => {
+  const date = new Date(dt); // create a new Date object from provided date as parameter
+  date.setDate(date.getDate() + 1);
+  return date;
+};
+
 const removeDuplicateData = (data) => {
   const idSet = new Set();
   const result = [];
@@ -250,7 +256,7 @@ function Abogoshi() {
                   </td>
                   <td>{formatPrice((percentage / 100) * barber.balance)}</td>
                   <td>
-                    {new Date(barber?.date).toISOString().split("T")[0]}
+                    {getStdDate(barber?.date).toISOString().split("T")[0]}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {formatTime(new Date(barber?.date).toISOString())}
                   </td>
@@ -638,7 +644,7 @@ function Kogosha() {
                   </td>
                   <td>{formatPrice(barber?.amountPaid)}</td>
                   <td>
-                    {new Date(barber?.date).toISOString().split("T")[0]}
+                    {getStdDate(barber?.date).toISOString().split("T")[0]}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {formatTime(new Date(barber?.date).toISOString())}
                   </td>
@@ -857,7 +863,7 @@ function AmafarangaAbagoshiBabikuje() {
                   </td>
                   <td>{formatPrice(barber?.amount)}</td>
                   <td>
-                    {new Date(barber?.date).toISOString().split("T")[0]}
+                    {getStdDate(barber?.date).toISOString().split("T")[0]}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {formatTime(new Date(barber?.date).toISOString())}
                   </td>

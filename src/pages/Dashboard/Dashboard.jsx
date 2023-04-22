@@ -109,11 +109,11 @@ function Abogoshi() {
       balance: editUsr?.balance,
     };
     try {
-      if (phone.length !== 10 || isNaN(parseInt(phone))) {
+      if (phone && (phone.length !== 10 || isNaN(parseInt(phone)))) {
         alert("Please provide a valid phone number.");
         return;
       }
-      if (nid.length !== 16 || isNaN(parseInt(nid))) {
+      if (nid && (nid.length !== 16 || isNaN(parseInt(nid)))) {
         alert("Please provide a valid NID number.");
         return;
       }

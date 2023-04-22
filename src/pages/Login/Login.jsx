@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import LoginStyled from "./LoginStyled";
 import axios from "axios";
+import io from "socket.io-client";
+import usePageVisibility from "../../customHooks/usePageVisibility";
+
+const socket = io(`${process.env.REACT_APP_PASSAGE}`);
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -32,6 +36,8 @@ const Login = () => {
     setForgotPassword(true);
   };
 
+  const isVisible = usePageVisibility();
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -42,6 +48,7 @@ const Login = () => {
       });
       const { token } = response.data;
       localStorage.setItem("token", token);
+      socket.emit("logdin", {});
       window.location.reload();
       setLoginLoading(false);
     } catch (error) {
@@ -54,6 +61,10 @@ const Login = () => {
       setLoginLoading(false);
     }
   };
+
+  socket.on("logdin", () => {
+    if (isVisible === false) window.location.reload();
+  });
 
   const handleCodeEntry = async (e) => {
     e.preventDefault();

@@ -20,6 +20,10 @@ import {
   Switch,
 } from "@chakra-ui/react";
 import { SearchIcon, SmallCloseIcon } from "@chakra-ui/icons";
+import io from "socket.io-client";
+import usePageVisibility from "../../customHooks/usePageVisibility";
+
+const socket = io(`${process.env.REACT_APP_PASSAGE}`);
 
 const formatPrice = (price) => {
   // Check if price is a valid number
@@ -42,6 +46,20 @@ const formatTime = (systemTime) => {
   return `${hours % 12}:${minutes < 10 ? "0" + minutes : minutes} ${ampm}`;
 };
 
+const removeDuplicateData = (data) => {
+  const idSet = new Set();
+  const result = [];
+
+  for (const obj of data) {
+    if (!idSet.has(obj._id)) {
+      result.push(obj);
+      idSet.add(obj._id);
+    }
+  }
+
+  return result;
+};
+
 let percentage = 0;
 
 Modal.setAppElement("#root");
@@ -62,6 +80,7 @@ const addForm = {};
 
 function Abogoshi() {
   document.title = "Abogoshi";
+  const isVisible = usePageVisibility();
   const [abakozi, setAbakozi] = useState([]);
 
   const handleEdit = (barber) => {
@@ -80,6 +99,7 @@ function Abogoshi() {
     try {
       if (window.confirm("Are you sure you want to delete this barber?")) {
         await axios.delete(`barbers/${barberId}`);
+        socket.emit("deletedBarbers", barberId);
         alert("Successfully deleted.");
         const n = abakozi.filter((umwogoshi) => umwogoshi._id !== barberId);
         setAbakozi(n);
@@ -126,12 +146,14 @@ function Abogoshi() {
           }
           return umukozi;
         });
+        socket.emit("newBalances", {});
         setAbakozi(n);
       } else {
         const res = await axios.post("barbers", newBarber);
         const n = [...abakozi];
         n.push(res.data);
         setAbakozi(n);
+        socket.emit("newBarbers", res.data);
       }
       alert(`Successfully ${editMode ? "updated" : "created"}!`);
       setCreateLoading(false);
@@ -161,6 +183,26 @@ function Abogoshi() {
       setBarbLoading(false);
     }
   };
+
+  socket.on("newBarbers", (data) => {
+    if (isVisible === false) {
+      if (
+        !abakozi.find((barber) => {
+          return barber._id === data._id;
+        })
+      ) {
+        setAbakozi((prev) => removeDuplicateData([...prev, data]));
+        return;
+      }
+    }
+  });
+
+  socket.on("deletedBarbers", (data) => {
+    if (isVisible === false) {
+      const n = abakozi.filter((barber) => barber._id !== data);
+      setAbakozi(n);
+    }
+  });
 
   useEffect(() => {
     fetchDt();
@@ -344,6 +386,7 @@ function Abogoshi() {
 
 function Kogosha() {
   document.title = "Amafaranga yavuye mu kogosha";
+  const isVisible = usePageVisibility();
   const [abogoshi, setAbogoshi] = useState([]);
   const [shownAbogoshi, setShownAbogoshi] = useState([]);
   const [filtered, setFiltered] = useState(false);
@@ -443,6 +486,7 @@ function Kogosha() {
       };
       setLoading(true);
       await axios.put(`barbers/${barber._id}`, barberUpd);
+      socket.emit("newBalances", {});
       setLoading(false);
       alert("Successfully created!");
       setIsOpen(false);
@@ -470,6 +514,28 @@ function Kogosha() {
       alert(`Failed to submit data: ${e.message}`);
     }
   };
+
+  socket.on("newBarbers", (data) => {
+    if (isVisible === false) {
+      if (!options.find((brb) => brb._id === data._id)) {
+        setOptions((prev) => removeDuplicateData([...prev, data]));
+        return;
+      }
+    }
+  });
+
+  socket.on("deletedBarbers", (data) => {
+    if (isVisible === false) {
+      if (options.find((brb) => brb._id === data)) {
+        const newOptions = options.filter((brb) => brb._id !== data);
+        setOptions(newOptions);
+      }
+    }
+  });
+
+  socket.on("newBalances", () => {
+    if (isVisible === false) window.location.reload();
+  });
 
   useEffect(() => {
     fetchAbogoshi();
@@ -655,6 +721,7 @@ function Kogosha() {
 
 function AmafarangaAbagoshiBabikuje() {
   document.title = "Amafaranga Abagoshi Bahawe";
+  const isVisible = usePageVisibility();
   const [abogoshi, setAbogoshi] = useState([]);
   const [barbLoading, setBarbLoading] = useState(false);
   const [barber, setBarber] = useState("");
@@ -702,6 +769,7 @@ function AmafarangaAbagoshiBabikuje() {
       };
       setLoading(true);
       await axios.put(`barbers/${barber._id}`, barberUpd);
+      socket.emit("newBalances", {});
       setLoading(false);
       alert("Successfully created!");
       setIsOpen(false);
@@ -727,6 +795,28 @@ function AmafarangaAbagoshiBabikuje() {
       alert(`Failed to submit data: ${e.message}`);
     }
   };
+
+  socket.on("newBalances", () => {
+    if (isVisible === false) window.location.reload();
+  });
+
+  socket.on("newBarbers", (data) => {
+    if (isVisible === false) {
+      if (!options.find((brb) => brb._id === data._id)) {
+        setOptions((prev) => removeDuplicateData([...prev, data]));
+        return;
+      }
+    }
+  });
+
+  socket.on("deletedBarbers", (data) => {
+    if (isVisible === false) {
+      if (options.find((brb) => brb._id === data)) {
+        const newOptions = options.filter((brb) => brb._id !== data);
+        setOptions(newOptions);
+      }
+    }
+  });
 
   useEffect(() => {
     fetchAbogoshi();
@@ -928,6 +1018,7 @@ const Settings = () => {
         cashierNumbers: settings.cashierNumbers.split(","),
       };
       await axios.put("settings", ns);
+      socket.emit("newSettings", {});
       setUpdLoading(false);
       percentage = ns.percentage;
       alert("Successfully updated settings");
@@ -975,8 +1066,8 @@ const Settings = () => {
         {loading && <p>Loading settings...</p>}
         {!loading && (
           <>
-            {presets.map((preset) => (
-              <div>
+            {presets.map((preset, ind) => (
+              <div key={ind}>
                 <label htmlFor={preset.prop}>{preset.name}</label>
                 <input
                   type="text"
@@ -1007,6 +1098,7 @@ const Settings = () => {
 };
 
 function Dashboard() {
+  const isVisible = usePageVisibility();
   const [barbLoading, setBarbLoading] = useState(true);
   const calc = async () => {
     try {
@@ -1042,6 +1134,15 @@ function Dashboard() {
     document.body.style.backgroundColor = "#fff";
     calc();
   }, []);
+
+  socket.on("logdout", () => {
+    localStorage.removeItem("token");
+    window.location.reload();
+  });
+
+  socket.on("newSettings", () => {
+    window.location.reload();
+  });
   return (
     <DashboardStyled>
       <div className="sidebar">
@@ -1067,6 +1168,7 @@ function Dashboard() {
           <li
             onClick={() => {
               localStorage.removeItem("token");
+              socket.emit("logdout", {});
               window.location.reload();
             }}
           >

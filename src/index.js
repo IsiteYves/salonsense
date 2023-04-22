@@ -9,7 +9,7 @@ import axios from "axios";
 
 axios.interceptors.request.use((request) => {
   let apiUrl = request.url;
-  request.url = `https://barber-ben.onrender.com/api/v1/${apiUrl}`;
+  request.url = `${process.env.REACT_APP_PASSAGE}/api/v1/${apiUrl}`;
   if (localStorage.getItem("token")) {
     request.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
   }

@@ -9,6 +9,13 @@ const DashboardStyled = styled.div`
     padding: 2rem 1rem;
     border-right: 1px solid #808080;
   }
+  .sidebar > h2 {
+    background-color: #fff;
+    padding: 1.4rem 2rem;
+    font-size: 21px;
+    text-transform: uppercase;
+    color: #411475;
+  }
   .sidebar ul {
     list-style: none;
   }

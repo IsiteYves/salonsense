@@ -1152,6 +1152,14 @@ function Dashboard() {
   return (
     <DashboardStyled>
       <div className="sidebar">
+        <h2>
+          Saloon{" "}
+          {role === "BLBR_ADMIN"
+            ? "Admin"
+            : role === "BLBR_CASHIER"
+            ? "Cashier"
+            : ""}
+        </h2>
         <ul>
           {role === "BLBR_ADMIN" && (
             <li>

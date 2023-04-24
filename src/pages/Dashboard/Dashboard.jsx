@@ -1329,8 +1329,8 @@ const Cashiers = memo(() => {
                   type="password"
                   id="password"
                   placeholder={`Password for this ${
-                    editMode1 ? "" : "new"
-                  } cashier...`}
+                    editMode1 ? "" : "new "
+                  }cashier...`}
                   maxLength={10}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}

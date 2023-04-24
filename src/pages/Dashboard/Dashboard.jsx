@@ -67,7 +67,11 @@ const removeDuplicateData = (data) => {
 };
 
 let percentage = 0;
-let usrr = null;
+const notAdmin = () => {
+  const token = localStorage.getItem("token");
+  const decoded = jwt_decode(token);
+  return decoded?.user?.role !== "BLBR_ADMIN";
+};
 
 Modal.setAppElement("#root");
 const customStyles = {
@@ -222,9 +226,7 @@ const Abogoshi = () => {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const decoded = jwt_decode(token);
-    if (decoded?.user?.role !== "BLBR_ADMIN") navigate("/");
+    if (notAdmin()) navigate("/");
     fetchDt();
   }, []);
   return (
@@ -1135,7 +1137,7 @@ const Cashiers = memo(() => {
   });
 
   useEffect(() => {
-    if (usrr?.role !== "BLBR_ADMIN") navigate("/");
+    if (notAdmin()) navigate("/");
     fetchDt();
   }, []);
   return (
@@ -1413,7 +1415,10 @@ const Settings = memo(() => {
     }
   };
 
+  const navigate = useNavigate();
+
   useState(() => {
+    if (notAdmin()) navigate("/");
     fetchSetttings();
   }, []);
 
@@ -1545,10 +1550,7 @@ const Dashboard = memo(() => {
         decoded?.user?.role !== "BLBR_CASHIER"
       )
         navigate("/");
-      else {
-        usrr = decoded?.user;
-        setUsr(decoded?.user);
-      }
+      else setUsr(decoded?.user);
     }
     document.body.style.backgroundColor = "#fff";
     calc();

@@ -1417,7 +1417,7 @@ const Settings = memo(() => {
 
   const navigate = useNavigate();
 
-  useState(() => {
+  useEffect(() => {
     if (notAdmin()) navigate("/");
     fetchSetttings();
   }, []);

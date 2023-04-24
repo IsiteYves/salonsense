@@ -1328,7 +1328,9 @@ const Cashiers = memo(() => {
                 <input
                   type="password"
                   id="password"
-                  placeholder="Password for new cashier..."
+                  placeholder={`Password for this ${
+                    editMode1 ? "" : "new"
+                  } cashier...`}
                   maxLength={10}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
@@ -1575,6 +1577,9 @@ const Dashboard = memo(() => {
               : ""}
             )
           </span>
+          <p style={{ dislay: "block", fontSize: "17px" }}>
+            Phone: {usr?.phone}
+          </p>
         </h2>
         <ul>
           {usr?.role === "BLBR_ADMIN" && (

@@ -1578,7 +1578,7 @@ const Dashboard = memo(() => {
             )
           </span>
           <p style={{ dislay: "block", fontSize: "17px" }}>
-            Login Phone: {usr?.phone}
+            Login Phone: <span style={{ color: "green" }}>{usr?.phone}</span>
           </p>
         </h2>
         <ul>

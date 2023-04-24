@@ -6,7 +6,6 @@
 
 #addForm {
   position: relative !important;
-  z-index: 8000 !important;
 }
 
 #addForm label {
@@ -31,6 +30,14 @@
   font-size: 16px;
   outline: none;
   color: #333;
+}
+
+#addForm input[type="text"]:focus,
+#addForm input[type="email"]:focus,
+#addForm input[type="tel"]:focus,
+#addForm select:focus,
+#addForm input[type="password"]:focus {
+  box-shadow: 0 0 0 3px #1e8fffa2;
 }
 
 .addForm {

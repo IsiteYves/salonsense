@@ -13,6 +13,7 @@ const DashboardStyled = styled.div`
     background-color: #fff;
     padding: 1.4rem 2rem;
     margin-bottom: 1rem;
+    font-weight: 700;
     font-size: 21px;
     text-transform: uppercase;
     color: #411475;
@@ -61,7 +62,7 @@ const DashboardStyled = styled.div`
     font-size: 20px !important;
     top: 0;
     box-shadow: 0 0 15px #808080;
-    z-index: 99 !important;
+    z-index: 98 !important;
   }
   .main-content > div:first-of-type > * {
     padding: 1rem 2rem;

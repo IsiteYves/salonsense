@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { Route, Link, Routes, Navigate, useNavigate } from "react-router-dom";
 import NotFound from "../../components/Notfound";
 import DashboardStyled from "./DashboardStyled";
@@ -48,7 +48,7 @@ const formatTime = (systemTime) => {
 
 const getStdDate = (dt) => {
   const date = new Date(dt); // create a new Date object from provided date as parameter
-  date.setDate(date.getDate() + 1);
+  // date.setDate(date.getDate());
   return date;
 };
 
@@ -67,6 +67,7 @@ const removeDuplicateData = (data) => {
 };
 
 let percentage = 0;
+let usrr = null;
 
 Modal.setAppElement("#root");
 const customStyles = {
@@ -78,14 +79,15 @@ const customStyles = {
     width: "40vw",
     minWidth: "300px",
     marginRight: "-50%",
+    zIndex: 99,
     transform: "translate(-50%, -50%)",
     boxShadow: "0 0 15px #cacaca",
   },
 };
 const addForm = {};
 
-function Abogoshi() {
-  document.title = "Abogoshi";
+const Abogoshi = () => {
+  document.title = "Penter Saloon | Abogoshi";
   const isVisible = usePageVisibility();
   const [abakozi, setAbakozi] = useState([]);
 
@@ -123,6 +125,7 @@ function Abogoshi() {
   const [editMode, setEditMode] = useState(false);
   const [editUsr, setEditUsr] = useState(null);
   const [barbLoading, setBarbLoading] = useState(true);
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -169,7 +172,15 @@ function Abogoshi() {
       setAddress("");
       setNid("");
     } catch (e) {
-      alert(`Failed to submit data: ${e.message}`);
+      setCreateLoading(false);
+      const { message } = e.response?.data;
+      if (message.toLowerCase() === "User already exists") {
+        alert("Hari undi MWOGOSHI usanzwe afite iyo nimero ya telephone.");
+        return;
+      }
+      alert(
+        `Network error: ${e.message}.You can refresh the page and try again.`
+      );
     }
   };
 
@@ -182,7 +193,7 @@ function Abogoshi() {
     } catch (e) {
       const { response } = e;
       if (response.status === 400) {
-        alert("Network Error");
+        alert(`${e?.message}.Try refreshing the page to try again.`);
       } else {
         alert("Please refresh the page.");
       }
@@ -211,6 +222,9 @@ function Abogoshi() {
   });
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    const decoded = jwt_decode(token);
+    if (decoded?.user?.role !== "BLBR_ADMIN") navigate("/");
     fetchDt();
   }, []);
   return (
@@ -388,10 +402,10 @@ function Abogoshi() {
       </Modal>
     </div>
   );
-}
+};
 
-function Kogosha() {
-  document.title = "Amafaranga yavuye mu kogosha";
+const Kogosha = memo(() => {
+  document.title = "Penter Saloon | Amafaranga yavuye mu kogosha";
   const isVisible = usePageVisibility();
   const [abogoshi, setAbogoshi] = useState([]);
   const [shownAbogoshi, setShownAbogoshi] = useState([]);
@@ -437,7 +451,7 @@ function Kogosha() {
       setFiltered(true);
       setShownAbogoshi(newRows);
     } catch (e) {
-      console.log(e?.message);
+      alert(`${e?.message}.Try refreshing the page to try again.`);
     }
   };
 
@@ -461,9 +475,9 @@ function Kogosha() {
     } catch (e) {
       const { response } = e;
       if (response.status === 400) {
-        alert("Network Error");
+        alert(`${e?.message}.Try refreshing the page to try again.`);
       } else {
-        alert("Network Error.You can refresh the page.");
+        alert(`${e?.message}.Try refreshing the page to try again.`);
       }
       setBarbLoading(false);
     }
@@ -517,7 +531,9 @@ function Kogosha() {
       setAmount(null);
     } catch (e) {
       setLoading(false);
-      alert(`Failed to submit data: ${e.message}`);
+      alert(
+        `Network error: ${e.message}.You can refresh the page and try again.`
+      );
     }
   };
 
@@ -723,10 +739,10 @@ function Kogosha() {
       </Modal>
     </div>
   );
-}
+});
 
-function AmafarangaAbagoshiBabikuje() {
-  document.title = "Amafaranga Abagoshi Bahawe";
+const AmafarangaAbagoshiBabikuje = memo(() => {
+  document.title = "Penter Saloon | Amafaranga Abagoshi Bahawe";
   const isVisible = usePageVisibility();
   const [abogoshi, setAbogoshi] = useState([]);
   const [barbLoading, setBarbLoading] = useState(false);
@@ -747,9 +763,9 @@ function AmafarangaAbagoshiBabikuje() {
     } catch (e) {
       const { response } = e;
       if (response.status === 400) {
-        alert("Network Error");
+        alert(`${e?.message}.Try refreshing the page to try again.`);
       } else {
-        alert("Network Error.You can refresh the page.");
+        alert(`${e?.message}.Try refreshing the page to try again.`);
       }
       setBarbLoading(false);
     }
@@ -798,7 +814,9 @@ function AmafarangaAbagoshiBabikuje() {
       setAmount(null);
     } catch (e) {
       setLoading(false);
-      alert(`Failed to submit data: ${e.message}`);
+      alert(
+        `Network error: ${e.message}.You can refresh the page and try again.`
+      );
     }
   };
 
@@ -941,18 +959,423 @@ function AmafarangaAbagoshiBabikuje() {
       </Modal>
     </div>
   );
-}
+});
 
-const Settings = () => {
+const Cashiers = memo(() => {
+  document.title = "Penter Saloon | Aba Cashier";
+  const isVisible = usePageVisibility();
+  const [abakozi, setAbakozi] = useState([]);
+  const [editMode1, setEditMode1] = useState(false);
+
+  const handleEdit = (barber) => {
+    setEditMode(true);
+    const { names, phone, address, nid } = barber;
+    setEditUsr(barber);
+    setName(names);
+    setPhone(phone);
+    setAddress(address);
+    setNid(nid);
+    setIsOpen(true);
+  };
+
+  const handleEditPs = (barber) => {
+    setEditMode1(true);
+    setEditUsr(barber);
+    setIsOpen(true);
+  };
+
+  const handleDelete = async (barberId) => {
+    // Handle delete action for the barber with the given ID
+    try {
+      if (window.confirm("Are you sure you want to delete this cashier?")) {
+        await axios.delete(`admin/${barberId}`);
+        socket.emit("deletedCashier", barberId);
+        alert("Successfully deleted.");
+        const n = abakozi.filter((umwogoshi) => umwogoshi._id !== barberId);
+        setAbakozi(n);
+      }
+    } catch (e) {
+      alert(`Failed to delete cashier: ${e.message}.Please try again.`);
+    }
+  };
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [nid, setNid] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordc, setPasswordc] = useState("");
+  const [modalIsOpen, setIsOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editUsr, setEditUsr] = useState(null);
+  const [barbLoading, setBarbLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    // Create a new barber object with the form data
+    const newBarber = {
+      names: name,
+      phone,
+      address,
+      nid,
+      password,
+      passwordc,
+      role: "BLBR_CASHIER",
+    };
+    try {
+      if (!editMode1) {
+        if (phone.length !== 10 || isNaN(parseInt(phone))) {
+          alert("Please provide a valid phone number.");
+          return;
+        }
+
+        if (nid && (nid.length !== 16 || isNaN(parseInt(nid)))) {
+          alert("Please provide a valid NID number.");
+          return;
+        }
+      }
+
+      if (!editMode || editMode1) {
+        if (password.length < 5) {
+          alert("Password must be at least 5 characters in length");
+          return;
+        }
+
+        if (password !== passwordc) {
+          alert("Please confirm password correctly");
+          return;
+        }
+      }
+
+      setCreateLoading(true);
+      if (editMode) {
+        await axios.put(`admin/${editUsr?._id}`, newBarber);
+        const n = abakozi.map((umukozi) => {
+          if (umukozi?._id === editUsr?._id) {
+            return { _id: editUsr?._id, date: editUsr?.date, ...newBarber };
+          }
+          return umukozi;
+        });
+        socket.emit("newCashier", {});
+        setAbakozi(n);
+      } else if (editMode1) {
+        await axios.put(`admin/update-password/${editUsr?._id}`, {
+          newPassword: password,
+          pswdConfirm: passwordc,
+        });
+        alert(
+          `Password updated successfully for Cashier '${
+            abakozi.find((umukozi) => umukozi?._id === editUsr?._id)?.names
+          }'`
+        );
+      } else {
+        const res = await axios.post("admin", newBarber);
+        const n = [...abakozi];
+        n.push(res.data);
+        setAbakozi(n);
+        socket.emit("newCashier", res.data);
+      }
+      if (!editMode1)
+        alert(`Successfully ${editMode ? "updated" : "created"}!`);
+      setCreateLoading(false);
+      setIsOpen(false);
+      setName("");
+      setPhone("");
+      setAddress("");
+      setNid("");
+    } catch (e) {
+      setCreateLoading(false);
+      const { message } = e.response?.data;
+      if (message.toLowerCase() === "User already exists") {
+        alert("Hari undi mu CASHIER usanzwe afite iyo nimero ya telephone.");
+        return;
+      }
+      alert(
+        `Network error: ${e.message}.You can refresh the page and try again.`
+      );
+    }
+  };
+
+  const fetchDt = async () => {
+    try {
+      setBarbLoading(true);
+      const res = await axios.get("admin");
+      setAbakozi(res.data);
+      setBarbLoading(false);
+    } catch (e) {
+      const { response } = e;
+      if (response.status === 400) {
+        alert(`${e?.message}.Try refreshing the page to try again.`);
+      } else {
+        alert("Please refresh the page.");
+      }
+      setBarbLoading(false);
+    }
+  };
+
+  socket.on("newCashier", (data) => {
+    if (isVisible === false) {
+      if (
+        !abakozi.find((barber) => {
+          return barber._id === data._id;
+        })
+      ) {
+        setAbakozi((prev) => removeDuplicateData([...prev, data]));
+        return;
+      }
+    }
+  });
+
+  socket.on("deletedCashier", (data) => {
+    if (isVisible === false) {
+      const n = abakozi.filter((barber) => barber._id !== data);
+      setAbakozi(n);
+    }
+  });
+
+  useEffect(() => {
+    if (usrr?.role !== "BLBR_ADMIN") navigate("/");
+    fetchDt();
+  }, []);
+  return (
+    <div>
+      <h2>Aba Cashiers</h2>
+      <button onClick={() => setIsOpen(true)}>Umu Cashier Mushya +</button>
+      <div>
+        {barbLoading ? (
+          <p>Loading data...</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>NID</th>
+                <th>Registered on</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {abakozi.map((barber, i) => (
+                <tr key={barber._id}>
+                  <td>{i + 1}</td>
+                  <td>{barber.names}</td>
+                  <td>{barber.phone}</td>
+                  <td
+                    style={{
+                      textAlign: barber.address ? "left" : "center",
+                    }}
+                  >
+                    {barber.address ? barber.address : "-"}
+                  </td>
+                  <td
+                    style={{
+                      textAlign: barber.nid ? "left" : "center",
+                    }}
+                  >
+                    {barber.nid ? barber.nid : "-"}
+                  </td>
+                  <td>
+                    {getStdDate(barber?.date).toISOString().split("T")[0]}
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    {formatTime(new Date(barber?.date).toISOString())}
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => handleEdit(barber)}
+                      style={{
+                        padding: "6px 14px",
+                        background: "green",
+                        color: "#fff",
+                        border: "none",
+                        outline: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Edit
+                    </button>{" "}
+                    |{" "}
+                    <button
+                      onClick={() => handleDelete(barber._id)}
+                      style={{
+                        padding: "6px 14px",
+                        background: "red",
+                        color: "#fff",
+                        border: "none",
+                        outline: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Delete
+                    </button>{" "}
+                    |{" "}
+                    <button
+                      onClick={() => handleEditPs(barber)}
+                      style={{
+                        padding: "6px 14px",
+                        background: "dodgerblue",
+                        color: "#fff",
+                        border: "none",
+                        outline: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Change Password
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {abakozi.length < 1 && !barbLoading ? (
+          <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
+            Nta ba cashiers bahari ubu.
+          </p>
+        ) : (
+          ""
+        )}
+      </div>
+      <Modal
+        isOpen={modalIsOpen}
+        style={customStyles}
+        contentLabel="Example Modal"
+      >
+        <button
+          onClick={() => {
+            setIsOpen(false);
+            setEditMode(false);
+            setEditMode1(false);
+            setName("");
+            setPhone("");
+            setAddress("");
+            setNid("");
+            setPassword("");
+            setPasswordc("");
+            setEditUsr(null);
+          }}
+          style={{
+            positin: "relative",
+            top: "3rem",
+            marginTop: "2rem",
+            marginBottom: "1rem",
+            background: "red",
+            color: "#fff",
+            border: "none",
+            outline: "none",
+            padding: "8px 14px",
+            cursor: "pointer",
+            borderRadius: "4px",
+          }}
+        >
+          Close
+        </button>
+        <form onSubmit={handleSubmit} style={addForm} id="addForm">
+          {!editMode1 && (
+            <>
+              <div>
+                <label htmlFor="name">Name *</label>
+                <input
+                  type="text"
+                  id="name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="phone">Phone *</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  placeholder="07xxxxxxxx"
+                  maxLength={10}
+                  value={phone}
+                  onChange={(event) => setPhone(event.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="address">Address (Optional)</label>
+                <input
+                  type="text"
+                  id="address"
+                  value={address}
+                  onChange={(event) => setAddress(event.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="nid">National Identity Card (optional)</label>
+                <input
+                  type="text"
+                  id="nid"
+                  value={nid}
+                  maxLength={16}
+                  onChange={(event) => setNid(event.target.value)}
+                />
+              </div>
+            </>
+          )}
+          {!editMode && (
+            <>
+              <div>
+                <label htmlFor="password">
+                  {editMode1 ? "New " : ""}Password *
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  placeholder="Password for new cashier..."
+                  maxLength={10}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="passwordc">
+                  Confirm {editMode1 ? "new " : ""}password *
+                </label>
+                <input
+                  type="password"
+                  id="passwordc"
+                  placeholder="Confirm password..."
+                  maxLength={10}
+                  value={passwordc}
+                  onChange={(event) => setPasswordc(event.target.value)}
+                  required
+                />
+              </div>
+            </>
+          )}
+          <button type="submit">
+            {createLoading
+              ? editMode || editMode1
+                ? editMode
+                  ? "Updating cashier..."
+                  : "Updating cashier password..."
+                : "Creating cashier..."
+              : editMode || editMode1
+              ? editMode
+                ? "Update Cashier"
+                : "Update Cashier password"
+              : "Create Cashier"}
+          </button>
+        </form>
+      </Modal>
+    </div>
+  );
+});
+
+const Settings = memo(() => {
   const presets = [
     { name: "Percentage umwogoshi atwara (%)", prop: "percentage" },
     {
       name: "Nimero za Admin (Enter the numbers, seperating them with commas)",
       prop: "adminNumbers",
-    },
-    {
-      name: "Nimero za Cashier (Enter the numbers, seperating them with commas)",
-      prop: "cashierNumbers",
     },
   ];
   const [loading, setLoading] = useState(false);
@@ -961,7 +1384,6 @@ const Settings = () => {
   const [settings, setSettings] = useState({
     percentage: "40",
     adminNumbers: "",
-    cashierNumbers: "",
   });
   const [initSets, setInitSets] = useState(null);
 
@@ -969,24 +1391,18 @@ const Settings = () => {
     try {
       setLoading(true);
       const res = await axios.get("settings");
-      if (
-        !res.data?.percentage ||
-        !res.data?.adminNumbers ||
-        !res.data?.cashierNumbers
-      ) {
+      if (!res.data?.percentage || !res.data?.adminNumbers) {
         setLoading(false);
         return;
       }
-      const { percentage, adminNumbers, cashierNumbers } = res.data;
+      const { percentage, adminNumbers } = res.data;
       setSettings({
         percentage,
         adminNumbers: adminNumbers.join(","),
-        cashierNumbers: cashierNumbers.join(","),
       });
       setInitSets({
         percentage,
         adminNumbers: adminNumbers.join(","),
-        cashierNumbers: cashierNumbers.join(","),
       });
       setLoading(false);
     } catch (e) {
@@ -1004,24 +1420,19 @@ const Settings = () => {
     try {
       if (
         settings.percentage === initSets.percentage &&
-        settings.adminNumbers === initSets.adminNumbers &&
-        settings.cashierNumbers === initSets.cashierNumbers
+        settings.adminNumbers === initSets.adminNumbers
       ) {
         alert("No changes made");
         return;
       }
       setUpdLoading(true);
-      if (
-        settings.adminNumbers.replace(/,/g, "").length % 10 !== 0 ||
-        settings.cashierNumbers.replace(/,/g, "").length % 10 !== 0
-      ) {
+      if (settings.adminNumbers.replace(/,/g, "").length % 10 !== 0) {
         alert("All phone numbers must be correct");
         return;
       }
       const ns = {
         percentage: parseInt(settings.percentage),
         adminNumbers: settings.adminNumbers.split(","),
-        cashierNumbers: settings.cashierNumbers.split(","),
       };
       await axios.put("settings", ns);
       socket.emit("newSettings", {});
@@ -1086,10 +1497,7 @@ const Settings = () => {
                       [preset.prop]: event.target.value.trim(),
                     })
                   }
-                  required={
-                    preset.prop !== "adminNumbers" &&
-                    preset.prop !== "cashierNumbers"
-                  }
+                  required={preset.prop !== "adminNumbers"}
                 />
               </div>
             ))}
@@ -1101,9 +1509,9 @@ const Settings = () => {
       </form>
     </div>
   );
-};
+});
 
-function Dashboard() {
+const Dashboard = memo(() => {
   const isVisible = usePageVisibility();
   const [barbLoading, setBarbLoading] = useState(true);
   const calc = async () => {
@@ -1115,15 +1523,15 @@ function Dashboard() {
     } catch (e) {
       const { response } = e;
       if (response.status === 400) {
-        alert("Network Error");
+        alert(`${e?.message}.Try refreshing the page to try again.`);
       } else {
-        alert("Please refresh the page.");
+        alert(`${e?.message}.Try refreshing the page to try again.`);
       }
       setBarbLoading(false);
     }
   };
   const navigate = useNavigate();
-  const [role, setRole] = useState("");
+  const [usr, setUsr] = useState("");
   useEffect(() => {
     if (!localStorage.getItem("token")) {
       navigate("/");
@@ -1135,7 +1543,10 @@ function Dashboard() {
         decoded?.user?.role !== "BLBR_CASHIER"
       )
         navigate("/");
-      else setRole(decoded?.user?.role);
+      else {
+        usrr = decoded?.user;
+        setUsr(decoded?.user);
+      }
     }
     document.body.style.backgroundColor = "#fff";
     calc();
@@ -1152,16 +1563,21 @@ function Dashboard() {
   return (
     <DashboardStyled>
       <div className="sidebar">
-        <h2>
-          Saloon{" "}
-          {role === "BLBR_ADMIN"
-            ? "Admin"
-            : role === "BLBR_CASHIER"
-            ? "Cashier"
-            : ""}
+        <h2>Penter Saloon</h2>
+        <h2 style={{ textTransform: "capitalize", padding: "0.7rem 2rem" }}>
+          {usr?.names}&nbsp;&nbsp;
+          <span style={{ fontSize: "14px", color: "green" }}>
+            (
+            {usr?.role === "BLBR_ADMIN"
+              ? "Admin"
+              : usr?.role === "BLBR_CASHIER"
+              ? "Cashier"
+              : ""}
+            )
+          </span>
         </h2>
         <ul>
-          {role === "BLBR_ADMIN" && (
+          {usr?.role === "BLBR_ADMIN" && (
             <li>
               <Link to="/abogoshi">Abogoshi</Link>
             </li>
@@ -1174,9 +1590,14 @@ function Dashboard() {
               Amafaranga abagoshi bahawe
             </Link>
           </li>
-          {role === "BLBR_ADMIN" && (
+          {usr?.role === "BLBR_ADMIN" && (
             <li>
               <Link to="/settings">Settings</Link>
+            </li>
+          )}
+          {usr?.role === "BLBR_ADMIN" && (
+            <li>
+              <Link to="/cashiers">Aba Cashier</Link>
             </li>
           )}
           <li
@@ -1199,12 +1620,17 @@ function Dashboard() {
               path="/"
               element={
                 <Navigate
-                  to={role && role === "BLBR_ADMIN" ? "/abogoshi" : "/kogosha"}
+                  to={
+                    usr?.role && usr?.role === "BLBR_ADMIN"
+                      ? "/abogoshi"
+                      : "/kogosha"
+                  }
                 />
               }
             />
             <Route path="/abogoshi" exact element={<Abogoshi />} />
             <Route path="/kogosha" exact element={<Kogosha />} />
+            <Route path="/cashiers" exact element={<Cashiers />} />
             <Route path="/settings" exact element={<Settings />} />
             <Route
               path="/amafaranga-abagoshi-babikuje"
@@ -1216,6 +1642,6 @@ function Dashboard() {
       )}
     </DashboardStyled>
   );
-}
+});
 
 export default Dashboard;

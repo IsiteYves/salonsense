@@ -14,7 +14,6 @@ const Login = () => {
 
   const [rCode, setRCode] = useState("");
   const [resetPhone, setResetPhone] = useState("");
-  const [resetUnm, setResetUnm] = useState("");
   const [usCode, setUsCode] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
@@ -43,7 +42,7 @@ const Login = () => {
     try {
       setLoginLoading(true);
       const response = await axios.post("admin/login", {
-        username,
+        phone: username,
         password,
       });
       const { token } = response.data;
@@ -54,7 +53,7 @@ const Login = () => {
     } catch (error) {
       const { response } = error;
       if (response.status === 400) {
-        alert("Incorrect username or password");
+        alert("Incorrect phone or password");
       } else {
         alert("Network error");
       }
@@ -81,7 +80,7 @@ const Login = () => {
     try {
       setResetLoading(true);
       const response = await axios.get(
-        `admin/get-reset-code?phone=${resetPhone}&username=${resetUnm}`
+        `admin/get-reset-code?phone=${resetPhone}`
       );
       const { resetCode } = response.data;
       setRCode(resetCode);
@@ -147,14 +146,6 @@ const Login = () => {
         <h2>Forgot Password</h2>
         <p>Andika nimero ya telephone.</p>
         <form onSubmit={handleReset}>
-          <label htmlFor="phone">Username:</label>
-          <input
-            type="text"
-            id="username"
-            value={resetUnm}
-            onChange={(e) => setResetUnm(e.target.value)}
-            required
-          />
           <label htmlFor="phone">Phone number:</label>
           <input
             type="text"
@@ -256,10 +247,11 @@ const Login = () => {
     <LoginStyled className="Login">
       <h2>Login</h2>
       <form onSubmit={handleLogin}>
-        <label htmlFor="username">Username:</label>
+        <label htmlFor="username">Phone number:</label>
         <input
           type="text"
           id="username"
+          maxLength={10}
           value={username}
           onChange={handleUsernameChange}
           required

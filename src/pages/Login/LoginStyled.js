@@ -39,6 +39,12 @@ const LoginStyled = styled.div`
     color: #333;
   }
 
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus {
+    box-shadow: 0 0 0 3px #1e8fffa2;
+  }
+
   button[type="submit"],
   button {
     width: 100%;

@@ -12,6 +12,7 @@ const DashboardStyled = styled.div`
   .sidebar > h2 {
     background-color: #fff;
     padding: 1.4rem 2rem;
+    margin-bottom: 1rem;
     font-size: 21px;
     text-transform: uppercase;
     color: #411475;

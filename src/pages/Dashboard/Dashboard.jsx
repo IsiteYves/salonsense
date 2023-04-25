@@ -1440,28 +1440,29 @@ const Settings = memo(() => {
   const [updLoading, setUpdLoading] = useState(false);
 
   const [settings, setSettings] = useState({
-    percentage: "40",
+    percentage: 40,
     adminNumbers: "",
   });
-  const [initSets, setInitSets] = useState(null);
+  const [initSets, setInitSets] = useState({
+    percentage: 40,
+    adminNumbers: "",
+  });
 
   const fetchSetttings = async () => {
     try {
       setLoading(true);
       const res = await axios.get("settings");
-      if (!res.data?.percentage || !res.data?.adminNumbers) {
-        setLoading(false);
-        return;
+      if (res.data?.percentage && !res.data?.adminNumbers) {
+        const { percentage, adminNumbers } = res.data;
+        setSettings({
+          percentage,
+          adminNumbers: adminNumbers.join(","),
+        });
+        setInitSets({
+          percentage,
+          adminNumbers: adminNumbers.join(","),
+        });
       }
-      const { percentage, adminNumbers } = res.data;
-      setSettings({
-        percentage,
-        adminNumbers: adminNumbers.join(","),
-      });
-      setInitSets({
-        percentage,
-        adminNumbers: adminNumbers.join(","),
-      });
       setLoading(false);
     } catch (e) {
       setLoading(false);

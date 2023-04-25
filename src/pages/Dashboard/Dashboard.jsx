@@ -151,6 +151,19 @@ const Abogoshi = () => {
         return;
       }
       setCreateLoading(true);
+      let numberTaken = false;
+      if (editMode)
+        numberTaken = barbers.find(
+          (barber) => barber?.phone === phone && barber?._id === editUsr?._id
+        );
+      else
+        numberTaken = barbers.find(
+          (barber) => barber?.phone === phone && barber?._id === editUsr?._id
+        );
+      if (numberTaken) {
+        alert("Hari undi MWOGOSHI usanzwe afite iyo nimero ya telephone.");
+        return;
+      }
       if (editMode) {
         await axios.put(`barbers/${editUsr?._id}`, newBarber);
         const n = abakozi.map((umukozi) => {

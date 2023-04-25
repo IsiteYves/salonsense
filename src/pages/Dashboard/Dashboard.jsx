@@ -153,11 +153,11 @@ const Abogoshi = () => {
       setCreateLoading(true);
       let numberTaken = false;
       if (editMode)
-        numberTaken = barbers.find(
+        numberTaken = abakozi.find(
           (barber) => barber?.phone === phone && barber?._id === editUsr?._id
         );
       else
-        numberTaken = barbers.find(
+        numberTaken = abakozi.find(
           (barber) => barber?.phone === phone && barber?._id === editUsr?._id
         );
       if (numberTaken) {

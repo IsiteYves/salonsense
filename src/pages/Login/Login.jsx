@@ -91,7 +91,9 @@ const Login = () => {
     } catch (error) {
       const { response } = error;
       if (response.status === 404) {
-        alert("User with those info was not found");
+        alert(
+          "Nta mu User uhari ukoresha iyo nimero.Please check again or contact the Admin."
+        );
       } else {
         alert("Network error");
       }

@@ -73,10 +73,10 @@ const notAdmin = () => {
   return decoded?.user?.role !== "BLBR_ADMIN";
 };
 
-const getUsrId = () => {
+const getUsr = () => {
   const token = localStorage.getItem("token");
   const decoded = jwt_decode(token);
-  return decoded?.user?._id;
+  return decoded?.user;
 };
 
 const getCreators = async () => {
@@ -84,10 +84,13 @@ const getCreators = async () => {
   return res.data;
 };
 
-const getCreator = (mc) => {
-  const all = getCreators();
+const getCreator = async (mc) => {
+  const all = await getCreators();
   const c = all.find((cr) => cr?._id === mc);
-  return `${c?.role === "BLBR_ADMIN" ? "ADMIN" : "CASHIER"} - ${c?.names}`;
+  const u = await getUsr();
+  return `${u?._id === mc ? "ADMIN" : "CASHIER"} - ${
+    u?._id === mc ? u?.names : c?.names
+  }`;
 };
 
 Modal.setAppElement("#root");
@@ -168,20 +171,17 @@ const Abogoshi = () => {
         alert("Please provide a valid NID number.");
         return;
       }
-      setCreateLoading(true);
       let numberTaken = false;
       if (editMode)
         numberTaken = abakozi.find(
-          (barber) => barber?.phone === phone && barber?._id === editUsr?._id
+          (barber) => barber?.phone === phone && barber?._id !== editUsr?._id
         );
-      else
-        numberTaken = abakozi.find(
-          (barber) => barber?.phone === phone && barber?._id === editUsr?._id
-        );
+      else numberTaken = abakozi.find((barber) => barber?.phone === phone);
       if (numberTaken) {
         alert("Hari undi MWOGOSHI usanzwe afite iyo nimero ya telephone.");
         return;
       }
+      setCreateLoading(true);
       if (editMode) {
         await axios.put(`barbers/${editUsr?._id}`, newBarber);
         const n = abakozi.map((umukozi) => {
@@ -500,8 +500,16 @@ const Kogosha = memo(() => {
     try {
       setBarbLoading(true);
       const response = await axios.get("shaves");
-      setAbogoshi(response.data);
-      setShownAbogoshi(response.data);
+      const ab = response.data;
+      ab.forEach((a) => {
+        if (a?.creator)
+          getCreator(a?.creator).then((cr) => {
+            a.creator = cr;
+          });
+        else a.creator = null;
+      });
+      setAbogoshi(ab);
+      setShownAbogoshi(ab);
       const res = await axios.get("barbers");
       setOptions(res.data);
       setBarbLoading(false);
@@ -536,7 +544,7 @@ const Kogosha = memo(() => {
       if (!window.confirm("Confirm?")) return;
       const barberUpd = {
         ...barber,
-        creator: getUsrId(),
+        creator: getUsr()?._id,
         balance: barber.balance + parseInt(amount),
       };
       setLoading(true);
@@ -679,7 +687,7 @@ const Kogosha = memo(() => {
                 <th>Umwogoshi</th>
                 <th>Amafaranga yamwogosheye</th>
                 <th>Itariki</th>
-                <th>Creator</th>
+                <th>Record Creator</th>
               </tr>
             </thead>
             <tbody>
@@ -702,7 +710,7 @@ const Kogosha = memo(() => {
                   </td>
                   <td>
                     {barber?.creator ? (
-                      getCreator(barber?.creator)
+                      barber?.creator
                     ) : (
                       <span style={{ color: "orange" }}>
                         [Umu user mwamusibye muri system]
@@ -801,7 +809,15 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
     try {
       setBarbLoading(true);
       const response = await axios.get("withdrawals");
-      setAbogoshi(response.data);
+      const ab = response.data;
+      ab.forEach((a) => {
+        if (a?.creator)
+          getCreator(a?.creator).then((cr) => {
+            a.creator = cr;
+          });
+        else a.creator = null;
+      });
+      setAbogoshi(ab);
       const res = await axios.get("barbers");
       setOptions(res.data);
       setBarbLoading(false);
@@ -832,7 +848,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
 
       const barberUpd = {
         ...barber,
-        creator: getUsrId(),
+        creator: getUsr()?._id,
         balance: barber.balance - (100 * parseInt(amount)) / percentage,
       };
       setLoading(true);
@@ -911,7 +927,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
                 <th>Umwogoshi</th>
                 <th>Amafaranga yabikuje</th>
                 <th>Itariki</th>
-                <th>Creator</th>
+                <th>Record Creator</th>
               </tr>
             </thead>
             <tbody>
@@ -934,7 +950,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
                   </td>
                   <td>
                     {barber?.creator ? (
-                      getCreator(barber?.creator)
+                      barber?.creator
                     ) : (
                       <span style={{ color: "orange" }}>
                         [Umu user mwamusibye muri system]

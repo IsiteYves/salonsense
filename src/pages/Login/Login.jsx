@@ -152,6 +152,7 @@ const Login = () => {
           <input
             type="text"
             id="phone"
+            maxLength={10}
             value={resetPhone}
             onChange={(e) => setResetPhone(e.target.value)}
             required

@@ -1569,9 +1569,11 @@ const Dashboard = memo(() => {
     calc();
   }, []);
 
-  socket.on("logdout", () => {
-    localStorage.removeItem("token");
-    window.location.reload();
+  socket.on("logdout", (id) => {
+    if (id === usr?._id) {
+      localStorage.removeItem("token");
+      window.location.reload();
+    }
   });
 
   socket.on("newSettings", () => {
@@ -1623,7 +1625,7 @@ const Dashboard = memo(() => {
           <li
             onClick={() => {
               localStorage.removeItem("token");
-              socket.emit("logdout", {});
+              socket.emit("logdout", usr?._id);
               window.location.reload();
             }}
           >

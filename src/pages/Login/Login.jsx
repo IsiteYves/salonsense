@@ -124,7 +124,7 @@ const Login = () => {
           pswdConfirm: newpasswordC,
         });
       }
-      alert("You have successfully reset the admin password.");
+      alert("You have successfully reset your password.");
       setCCode(false);
       setResetPLoading(false);
       setUsCode("");

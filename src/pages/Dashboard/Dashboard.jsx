@@ -73,6 +73,23 @@ const notAdmin = () => {
   return decoded?.user?.role !== "BLBR_ADMIN";
 };
 
+const getUsrId = () => {
+  const token = localStorage.getItem("token");
+  const decoded = jwt_decode(token);
+  return decoded?.user?._id;
+};
+
+const getCreators = async () => {
+  const res = await axios.get("admin");
+  return res.data;
+};
+
+const getCreator = (mc) => {
+  const all = getCreators();
+  const c = all.find((cr) => cr?._id === mc);
+  return `${c?.role === "BLBR_ADMIN" ? "ADMIN" : "CASHIER"} - ${c?.names}`;
+};
+
 Modal.setAppElement("#root");
 const customStyles = {
   content: {
@@ -140,6 +157,7 @@ const Abogoshi = () => {
       address,
       nid,
       balance: editUsr?.balance,
+      creator: "",
     };
     try {
       if (phone.length !== 10 || isNaN(parseInt(phone))) {
@@ -514,9 +532,11 @@ const Kogosha = memo(() => {
         alert("Please provide a valid amount of money.");
         return;
       }
+      const token = localStorage.getItem("token");
       if (!window.confirm("Confirm?")) return;
       const barberUpd = {
         ...barber,
+        creator: getUsrId(),
         balance: barber.balance + parseInt(amount),
       };
       setLoading(true);
@@ -659,6 +679,7 @@ const Kogosha = memo(() => {
                 <th>Umwogoshi</th>
                 <th>Amafaranga yamwogosheye</th>
                 <th>Itariki</th>
+                <th>Creator</th>
               </tr>
             </thead>
             <tbody>
@@ -678,6 +699,15 @@ const Kogosha = memo(() => {
                     {getStdDate(barber?.date).toISOString().split("T")[0]}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {formatTime(new Date(barber?.date).toISOString())}
+                  </td>
+                  <td>
+                    {barber?.creator ? (
+                      getCreator(barber?.creator)
+                    ) : (
+                      <span style={{ color: "orange" }}>
+                        [Umu user mwamusibye muri system]
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -802,6 +832,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
 
       const barberUpd = {
         ...barber,
+        creator: getUsrId(),
         balance: barber.balance - (100 * parseInt(amount)) / percentage,
       };
       setLoading(true);
@@ -880,6 +911,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
                 <th>Umwogoshi</th>
                 <th>Amafaranga yabikuje</th>
                 <th>Itariki</th>
+                <th>Creator</th>
               </tr>
             </thead>
             <tbody>
@@ -899,6 +931,15 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
                     {getStdDate(barber?.date).toISOString().split("T")[0]}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {formatTime(new Date(barber?.date).toISOString())}
+                  </td>
+                  <td>
+                    {barber?.creator ? (
+                      getCreator(barber?.creator)
+                    ) : (
+                      <span style={{ color: "orange" }}>
+                        [Umu user mwamusibye muri system]
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}

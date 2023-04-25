@@ -87,10 +87,8 @@ const getCreators = async () => {
 const getCreator = async (mc) => {
   const all = await getCreators();
   const c = all.find((cr) => cr?._id === mc);
-  const u = await getUsr();
-  return `${u?._id === mc ? "ADMIN" : "CASHIER"} - ${
-    u?._id === mc ? u?.names : c?.names
-  }`;
+  if (!c) return null;
+  return `${c?.role === "BLBR_ADMIN" ? "ADMIN" : "CASHIER"} - ${c?.names}`;
 };
 
 Modal.setAppElement("#root");
@@ -501,21 +499,26 @@ const Kogosha = memo(() => {
       setBarbLoading(true);
       const response = await axios.get("shaves");
       const ab = response.data;
-      ab.forEach((a) => {
-        if (a?.creator)
-          getCreator(a?.creator).then((cr) => {
-            a.creator = cr;
-          });
-        else a.creator = null;
-      });
-      setAbogoshi(ab);
-      setShownAbogoshi(ab);
+      const nu = [];
+      for (let i = 0; i < ab.length; i++) {
+        let creator = await getCreator(ab[i]?.creator);
+        const a = {
+          _id: ab[i]?._id,
+          date: ab[i]?.date,
+          amountPaid: ab[i]?.amountPaid,
+          barber: ab[i]?.barber,
+          creator,
+        };
+        nu.push(a);
+      }
+      setAbogoshi(nu);
+      setShownAbogoshi(nu);
       const res = await axios.get("barbers");
       setOptions(res.data);
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;
-      if (response.status === 400) {
+      if (response?.status === 400) {
         alert(`${e?.message}.Try refreshing the page to try again.`);
       } else {
         alert(`${e?.message}.Try refreshing the page to try again.`);
@@ -810,13 +813,14 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
       setBarbLoading(true);
       const response = await axios.get("withdrawals");
       const ab = response.data;
-      ab.forEach((a) => {
-        if (a?.creator)
-          getCreator(a?.creator).then((cr) => {
-            a.creator = cr;
-          });
-        else a.creator = null;
-      });
+      const nu = [];
+      for (let i = 0; i < ab.length; i++) {
+        const a = { ...ab[i] };
+        // getCreator(a?.creator).then((cr) => {
+        //   a.creator = cr;
+        // });
+        nu.push(a);
+      }
       setAbogoshi(ab);
       const res = await axios.get("barbers");
       setOptions(res.data);
@@ -1173,7 +1177,8 @@ const Cashiers = memo(() => {
     try {
       setBarbLoading(true);
       const res = await axios.get("admin");
-      setAbakozi(res.data);
+      const nd = res.data.filter((dt) => dt?.role === "BLBR_ADMIN");
+      setAbakozi(nd);
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;

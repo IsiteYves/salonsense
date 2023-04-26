@@ -1071,6 +1071,21 @@ const Expenses = memo(() => {
     key: "selection",
   };
 
+  const findTot = async () => {
+    try {
+      setBarbLoading(true);
+      const response = await axios.get("shaves");
+      let tot = 0;
+      for (let i = 0; i < response.data.length; i++)
+        tot += ((100 - percentage) / 100) * response.data[i]?.amountPaid;
+      setNetAmount(tot);
+      setBarbLoading(false);
+    } catch (e) {
+      setBarbLoading(false);
+      alert(`${e?.message}.Try refreshing the page to try again.`);
+    }
+  };
+
   const handleSelect = (range) => {
     try {
       const { startDate, endDate } = range?.selection;
@@ -1109,6 +1124,7 @@ const Expenses = memo(() => {
         tot += parseInt(ab[i]?.amountSpent);
         nu.push(a);
       }
+      await findTot();
       setTotExpense(tot);
       setAbogoshi(nu);
       setShownAbogoshi(nu);
@@ -1175,25 +1191,6 @@ const Expenses = memo(() => {
       );
     }
   };
-
-  const findTot = async () => {
-    try {
-      setBarbLoading(true);
-      const response = await axios.get("shaves");
-      let tot = 0;
-      for (let i = 0; i < response.data.length; i++)
-        tot += ((100 - percentage) / 100) * response.data[i]?.amountPaid;
-      setNetAmount(tot);
-      setBarbLoading(false);
-    } catch (e) {
-      setBarbLoading(false);
-      alert(`${e?.message}.Try refreshing the page to try again.`);
-    }
-  };
-
-  useEffect(() => {
-    findTot();
-  }, []);
 
   socket.on("newBalances", () => {
     if (isVisible === false) window.location.reload();

@@ -493,7 +493,7 @@ const Kogosha = memo(() => {
   const [options, setOptions] = useState([]);
 
   const selectionRange = {
-    startDate: new Date("2023-04-18"),
+    startDate: new Date("2023-04-25"),
     endDate: new Date(),
     key: "selection",
   };
@@ -1066,7 +1066,7 @@ const Expenses = memo(() => {
   const [dtFilter, setDtFilter] = useState(false);
   const [filtered, setFiltered] = useState(false);
   const selectionRange = {
-    startDate: new Date("2023-04-18"),
+    startDate: new Date("2023-04-25"),
     endDate: new Date(),
     key: "selection",
   };

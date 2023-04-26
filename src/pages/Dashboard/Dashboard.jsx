@@ -1,5 +1,5 @@
 import { memo, useEffect, useState } from "react";
-import { Route, Link, Routes, Navigate, useNavigate } from "react-router-dom";
+import { Route, Link, Routes, useNavigate } from "react-router-dom";
 import NotFound from "../../components/Notfound";
 import DashboardStyled from "./DashboardStyled";
 import Modal from "react-modal";
@@ -255,13 +255,14 @@ const Abogoshi = () => {
   });
 
   useEffect(() => {
-    if (notAdmin()) navigate("/");
     fetchDt();
   }, []);
   return (
     <div>
       <h2>Abogoshi</h2>
-      <button onClick={() => setIsOpen(true)}>Umwogoshi Mushya +</button>
+      {getUsr()?.role === "BLBR_ADMIN" && (
+        <button onClick={() => setIsOpen(true)}>Umwogoshi Mushya +</button>
+      )}
       <div>
         {barbLoading ? (
           <p>Loading data...</p>
@@ -276,7 +277,7 @@ const Abogoshi = () => {
                 <th>NID</th>
                 <th>Balance</th>
                 <th>Registered on</th>
-                <th>Actions</th>
+                {getUsr()?.role === "BLBR_ADMIN" && <th>Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -305,35 +306,37 @@ const Abogoshi = () => {
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     {formatTime(new Date(barber?.date).toISOString())}
                   </td>
-                  <td>
-                    <button
-                      onClick={() => handleEdit(barber)}
-                      style={{
-                        padding: "6px 14px",
-                        background: "green",
-                        color: "#fff",
-                        border: "none",
-                        outline: "none",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Edit
-                    </button>{" "}
-                    |{" "}
-                    <button
-                      onClick={() => handleDelete(barber._id)}
-                      style={{
-                        padding: "6px 14px",
-                        background: "red",
-                        color: "#fff",
-                        border: "none",
-                        outline: "none",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </td>
+                  {getUsr()?.role === "BLBR_ADMIN" && (
+                    <td>
+                      <button
+                        onClick={() => handleEdit(barber)}
+                        style={{
+                          padding: "6px 14px",
+                          background: "green",
+                          color: "#fff",
+                          border: "none",
+                          outline: "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Edit
+                      </button>{" "}
+                      |{" "}
+                      <button
+                        onClick={() => handleDelete(barber._id)}
+                        style={{
+                          padding: "6px 14px",
+                          background: "red",
+                          color: "#fff",
+                          border: "none",
+                          outline: "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -568,6 +571,7 @@ const Kogosha = memo(() => {
       n.push({
         barber: barber._id,
         amountPaid: parseInt(amount),
+        creator: getUsr()?.names,
         date: new Date(),
       });
       setAbogoshi(n);
@@ -815,13 +819,17 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
       const ab = response.data;
       const nu = [];
       for (let i = 0; i < ab.length; i++) {
-        const a = { ...ab[i] };
-        // getCreator(a?.creator).then((cr) => {
-        //   a.creator = cr;
-        // });
+        let creator = await getCreator(ab[i]?.creator);
+        const a = {
+          _id: ab[i]?._id,
+          date: ab[i]?.date,
+          amount: ab[i]?.amountPaid,
+          barber: ab[i]?.barber,
+          creator,
+        };
         nu.push(a);
       }
-      setAbogoshi(ab);
+      setAbogoshi(nu);
       const res = await axios.get("barbers");
       setOptions(res.data);
       setBarbLoading(false);
@@ -873,6 +881,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
       n.push({
         barber: barber._id,
         amount: parseInt(amount),
+        creator: getUsr()?.names,
         date: new Date(),
       });
       setAbogoshi(n);
@@ -1662,11 +1671,9 @@ const Dashboard = memo(() => {
           </p>
         </h2>
         <ul>
-          {usr?.role === "BLBR_ADMIN" && (
-            <li>
-              <Link to="/abogoshi">Abogoshi</Link>
-            </li>
-          )}
+          <li>
+            <Link to="/abogoshi">Abogoshi</Link>
+          </li>
           <li>
             <Link to="/kogosha">Ayavuye mu kogosha</Link>
           </li>
@@ -1701,18 +1708,7 @@ const Dashboard = memo(() => {
       ) : (
         <div className="main-content">
           <Routes>
-            <Route
-              path="/"
-              element={
-                <Navigate
-                  to={
-                    usr?.role && usr?.role === "BLBR_ADMIN"
-                      ? "/abogoshi"
-                      : "/kogosha"
-                  }
-                />
-              }
-            />
+            <Route path="/" element={<Abogoshi />} />
             <Route path="/abogoshi" exact element={<Abogoshi />} />
             <Route path="/kogosha" exact element={<Kogosha />} />
             <Route path="/cashiers" exact element={<Cashiers />} />

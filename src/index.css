@@ -17,10 +17,16 @@
   color: #666;
 }
 
+#addForm textarea {
+  min-height: 130px;
+  max-height: 250px;
+}
+
 #addForm input[type="text"],
 #addForm input[type="email"],
 #addForm input[type="tel"],
 #addForm select,
+#addForm textarea,
 #addForm input[type="password"] {
   width: 95%;
   padding: 10px;
@@ -36,6 +42,7 @@
 #addForm input[type="email"]:focus,
 #addForm input[type="tel"]:focus,
 #addForm select:focus,
+#addForm textarea:focus,
 #addForm input[type="password"]:focus {
   box-shadow: 0 0 0 3px #1e8fffa2;
 }

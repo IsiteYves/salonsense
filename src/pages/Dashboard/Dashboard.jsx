@@ -452,6 +452,7 @@ const Kogosha = memo(() => {
   const [total, setTotal] = useState(0);
   const [dtFilter, setDtFilter] = useState(false);
   const [searchKey, setSearchKey] = useState("");
+  const [totExpense, setTotExpense] = useState(0);
 
   const onSearch = (value) => {
     if (value !== searchKey) setSearchKey(value);
@@ -518,6 +519,10 @@ const Kogosha = memo(() => {
       setShownAbogoshi(nu);
       const res = await axios.get("barbers");
       setOptions(res.data);
+      const res1 = await axios.get("expenses");
+      let exp = 0;
+      for (let expe of res1.data) exp += expe?.amountSpent;
+      setTotExpense(exp);
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;
@@ -543,10 +548,9 @@ const Kogosha = memo(() => {
     // Create a new barber object with the form data
     try {
       if (isNaN(parseInt(amount)) || parseInt(amount) < 0) {
-        alert("Please provide a valid amount of money.");
+        alert("Please provide a correct amount of money.");
         return;
       }
-      const token = localStorage.getItem("token");
       if (!window.confirm("Confirm?")) return;
       const barberUpd = {
         ...barber,
@@ -643,9 +647,10 @@ const Kogosha = memo(() => {
             <span style={{ fontWeight: 700 }}>{formatPrice(total)}</span>
           </h3>
           <h3>
-            Net amount ya saloon (ukuyemo ayo abogoshi bahembwa/bazahembwa):{" "}
+            Net amount ya saloon (ukuyemo ayo abogoshi
+            bahembwa/bazahembwa/ayakoreshejwe (Expenses)):{" "}
             <span style={{ fontWeight: 700 }}>
-              {formatPrice((total * (100 - percentage)) / 100)}
+              {formatPrice((total * (100 - percentage)) / 100 - totExpense)}
             </span>
           </h3>
           <Flex>
@@ -823,7 +828,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
         const a = {
           _id: ab[i]?._id,
           date: ab[i]?.date,
-          amount: ab[i]?.amountPaid,
+          amount: ab[i]?.amount,
           barber: ab[i]?.barber,
           creator,
         };
@@ -849,7 +854,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
     // Create a new barber object with the form data
     try {
       if (isNaN(parseInt(amount)) || parseInt(amount) < 0) {
-        alert("Please provide a valid amount of money.");
+        alert("Please provide a correct amount of money.");
         return;
       }
       if ((percentage / 100) * barber?.balance - parseInt(amount) < 0) {
@@ -1034,6 +1039,301 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
               id="phone"
               placeholder="Rwf"
               maxLength={5}
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+              required
+            />
+          </div>
+          <button type="submit">{loading ? "Creating..." : "Create"}</button>
+        </form>
+      </Modal>
+    </div>
+  );
+});
+
+const Expenses = memo(() => {
+  document.title = "Penter Saloon | Amafaranga Yasotse Muri Saloon (Expenses)";
+  const isVisible = usePageVisibility();
+  const [abogoshi, setAbogoshi] = useState([]);
+  const [shownAbogoshi, setShownAbogoshi] = useState([]);
+  const [barbLoading, setBarbLoading] = useState(false);
+  const [barber, setBarber] = useState("");
+  const [amount, setAmount] = useState(null);
+  const [modalIsOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [netAmount, setNetAmount] = useState(0);
+  const [totExpense, setTotExpense] = useState(0);
+  const [dtFilter, setDtFilter] = useState(false);
+  const [filtered, setFiltered] = useState(false);
+  const selectionRange = {
+    startDate: new Date("2023-04-18"),
+    endDate: new Date(),
+    key: "selection",
+  };
+
+  const handleSelect = (range) => {
+    try {
+      const { startDate, endDate } = range?.selection;
+      const mills1 = new Date(startDate).getTime();
+      const mills2 = new Date(endDate).getTime() + 86400000;
+      const newRows = [];
+      for (let i = 0; i < abogoshi.length; i++) {
+        const currDateMills = new Date(abogoshi[i]?.date).getTime();
+        if (currDateMills >= mills1 && currDateMills <= mills2) {
+          newRows.push(abogoshi[i]);
+        }
+      }
+      setFiltered(true);
+      setShownAbogoshi(newRows);
+    } catch (e) {
+      alert(`${e?.message}.Try refreshing the page to try again.`);
+    }
+  };
+
+  const fetchAbogoshi = async () => {
+    try {
+      setBarbLoading(true);
+      const response = await axios.get("expenses");
+      const ab = response.data;
+      const nu = [];
+      let tot = 0;
+      for (let i = 0; i < ab.length; i++) {
+        let creator = await getCreator(ab[i]?.creator);
+        const a = {
+          _id: ab[i]?._id,
+          materials: ab[i]?.materials,
+          date: ab[i]?.date,
+          amountSpent: ab[i]?.amountSpent,
+          creator,
+        };
+        tot += parseInt(ab[i]?.amountSpent);
+        nu.push(a);
+      }
+      setTotExpense(tot);
+      setAbogoshi(nu);
+      setShownAbogoshi(nu);
+      setBarbLoading(false);
+    } catch (e) {
+      const { response } = e;
+      if (response.status === 400) {
+        alert(`${e?.message}.Try refreshing the page to try again.`);
+      } else {
+        alert(`${e?.message}.Try refreshing the page to try again.`);
+      }
+      setBarbLoading(false);
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    // Create a new barber object with the form data
+    try {
+      if (isNaN(parseInt(amount)) || parseInt(amount) < 0) {
+        alert("Please provide a correct amount of money.");
+        return;
+      }
+
+      if (parseInt(amount) > netAmount - totExpense) {
+        alert(
+          `Saloon ubu ifitemo amafaranga make ugereranyije n'ayo uvuze.Ifite ${formatPrice(
+            netAmount - totExpense
+          )}`
+        );
+        return;
+      }
+
+      if (!window.confirm("Confirm expense creation?")) return;
+
+      const barberUpd = {
+        materials: barber,
+        amountSpent: parseInt(amount),
+        creator: getUsr()?._id,
+      };
+      setLoading(true);
+      await axios.post(`expenses`, barberUpd);
+      setNetAmount(netAmount - totExpense - parseInt(amount));
+      socket.emit("newBalances", {});
+      setLoading(false);
+      alert("Successfully created!");
+      setIsOpen(false);
+      const n = [...abogoshi];
+      n.push({
+        materials: barber,
+        amountSpent: parseInt(amount),
+        creator: getUsr()?.names,
+        date: new Date(),
+      });
+      setTotExpense(totExpense + parseInt(amount));
+      setAbogoshi(n);
+      setShownAbogoshi(n);
+      setBarber(null);
+      setAmount(null);
+    } catch (e) {
+      setLoading(false);
+      alert(
+        `Network error: ${e.message}.You can refresh the page and try again.`
+      );
+    }
+  };
+
+  const findTot = async () => {
+    try {
+      setBarbLoading(true);
+      const response = await axios.get("shaves");
+      let tot = 0;
+      for (let i = 0; i < response.data.length; i++)
+        tot += ((100 - percentage) / 100) * response.data[i]?.amountPaid;
+      setNetAmount(tot);
+      setBarbLoading(false);
+    } catch (e) {
+      setBarbLoading(false);
+      alert(`${e?.message}.Try refreshing the page to try again.`);
+    }
+  };
+
+  useEffect(() => {
+    findTot();
+  }, []);
+
+  socket.on("newBalances", () => {
+    if (isVisible === false) window.location.reload();
+  });
+
+  useEffect(() => {
+    fetchAbogoshi();
+  }, []);
+  return (
+    <div>
+      <h2>Amafaranga yasotse muri saloon (Expenses)</h2>
+      {!barbLoading && (
+        <>
+          <button
+            onClick={async () => {
+              setIsOpen(true);
+            }}
+          >
+            Record new expense +
+          </button>
+          <b>
+            <span style={{ fontWeight: 400 }}>Asigaye muri saloon:</span>{" "}
+            {formatPrice(netAmount - totExpense)}
+          </b>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <b>
+            <span style={{ fontWeight: 400 }}>Total expenses:</span>{" "}
+            {formatPrice(totExpense)}
+          </b>
+        </>
+      )}
+      {abogoshi.length > 0 && (
+        <>
+          <FormControl display="flex" alignItems="center">
+            <FormLabel htmlFor="email-alerts" mb="0">
+              Toggle Date Filter
+            </FormLabel>
+            <Switch
+              id="email-alerts"
+              onChange={() => {
+                setDtFilter(!dtFilter);
+              }}
+            />
+          </FormControl>
+          {dtFilter && (
+            <DateRangePicker
+              ranges={[selectionRange]}
+              onChange={handleSelect}
+            />
+          )}
+        </>
+      )}
+      <div>
+        {barbLoading ? (
+          <p>Loading data...</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Icyo amafaranga yakoreshejwe</th>
+                <th>Umubare w'Amafaranga yakoreshejwe</th>
+                <th>Itariki</th>
+                <th>Record Creator</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shownAbogoshi.map((barber) => (
+                <tr key={barber._id}>
+                  <td>{barber?.materials}</td>
+                  <td>{formatPrice(barber?.amountSpent)}</td>
+                  <td>
+                    {getStdDate(barber?.date).toISOString().split("T")[0]}
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    {formatTime(new Date(barber?.date).toISOString())}
+                  </td>
+                  <td>
+                    {barber?.creator ? (
+                      barber?.creator
+                    ) : (
+                      <span style={{ color: "orange" }}>
+                        [Umu user mwamusibye muri system]
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {shownAbogoshi.length < 1 && !barbLoading ? (
+          <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
+            {filtered
+              ? "Nta mafaranga yasotse muri saloon ku ma expenses muri ayo matariki uhisemo."
+              : "Nta mafaranga arasoka muri saloon ku ma expenses."}
+          </p>
+        ) : (
+          ""
+        )}
+      </div>
+      <Modal
+        isOpen={modalIsOpen}
+        style={customStyles}
+        contentLabel="Example Modal"
+      >
+        <button
+          onClick={() => setIsOpen(false)}
+          style={{
+            marginBottom: "1rem",
+            background: "red",
+            color: "#fff",
+            border: "none",
+            outline: "none",
+            padding: "8px 14px",
+            cursor: "pointer",
+            borderRadius: "4px",
+          }}
+        >
+          Close
+        </button>
+        <form onSubmit={handleSubmit} style={addForm} id="addForm">
+          <h2 style={{ marginBottom: "1rem", textAlign: "center" }}>
+            Record new expenses
+          </h2>
+          <div>
+            <label htmlFor="phone">Icyo amafaranga yakoreshejwe</label>
+            <textarea
+              id="materials"
+              placeholder="Andika hano..."
+              value={barber}
+              onChange={(event) => setBarber(event.target.value)}
+              required
+            ></textarea>
+          </div>
+          <div>
+            <label htmlFor="igiciro">Igiciro (Amafaranga)</label>
+            <input
+              type="text"
+              id="igiciro"
+              placeholder="Rwf"
+              maxLength={8}
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
               required
@@ -1682,6 +1982,9 @@ const Dashboard = memo(() => {
               Amafaranga abagoshi bahawe
             </Link>
           </li>
+          <li>
+            <Link to="/amafaranga-yosotse">Amafaranga yasotse (Expenses)</Link>
+          </li>
           {usr?.role === "BLBR_ADMIN" && (
             <li>
               <Link to="/settings">Settings</Link>
@@ -1713,6 +2016,7 @@ const Dashboard = memo(() => {
             <Route path="/kogosha" exact element={<Kogosha />} />
             <Route path="/cashiers" exact element={<Cashiers />} />
             <Route path="/settings" exact element={<Settings />} />
+            <Route path="/amafaranga-yosotse" exact element={<Expenses />} />
             <Route
               path="/amafaranga-abagoshi-babikuje"
               element={<AmafarangaAbagoshiBabikuje />}

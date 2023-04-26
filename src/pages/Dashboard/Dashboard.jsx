@@ -1177,7 +1177,7 @@ const Cashiers = memo(() => {
     try {
       setBarbLoading(true);
       const res = await axios.get("admin");
-      const nd = res.data.filter((dt) => dt?.role === "BLBR_ADMIN");
+      const nd = res.data.filter((dt) => dt?.role === "BLBR_CASHIER");
       setAbakozi(nd);
       setBarbLoading(false);
     } catch (e) {

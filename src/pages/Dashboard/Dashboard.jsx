@@ -1038,7 +1038,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
 });
 
 const Cashiers = memo(() => {
-  document.title = "Penter Saloon | Aba Cashier";
+  document.title = "Penter Saloon | Aba Cashiers";
   const isVisible = usePageVisibility();
   const [abakozi, setAbakozi] = useState([]);
   const [editMode1, setEditMode1] = useState(false);
@@ -1682,7 +1682,7 @@ const Dashboard = memo(() => {
           )}
           {usr?.role === "BLBR_ADMIN" && (
             <li>
-              <Link to="/cashiers">Aba Cashier</Link>
+              <Link to="/cashiers">Aba Cashiers</Link>
             </li>
           )}
           <li

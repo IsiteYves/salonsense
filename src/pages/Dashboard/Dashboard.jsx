@@ -928,57 +928,61 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
   return (
     <div>
       <h2>Amafaranga Abogoshi Bahawe</h2>
-      <button
-        onClick={async () => {
-          setIsOpen(true);
-        }}
-      >
-        Kubikura +
-      </button>
       <div>
         {barbLoading ? (
           <p>Loading data...</p>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Umwogoshi</th>
-                <th>Amafaranga yabikuje</th>
-                <th>Itariki</th>
-                <th>Record Creator</th>
-              </tr>
-            </thead>
-            <tbody>
-              {abogoshi.map((barber) => (
-                <tr key={barber._id}>
-                  <td>
-                    {options.find((brb) => brb?._id === barber.barber)?.name ? (
-                      options.find((brb) => brb?._id === barber.barber)?.name
-                    ) : (
-                      <span style={{ color: "orange" }}>
-                        [Uyu mwogoshi mwamusibye muri system]
-                      </span>
-                    )}
-                  </td>
-                  <td>{formatPrice(barber?.amount)}</td>
-                  <td>
-                    {getStdDate(barber?.date).toISOString().split("T")[0]}
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    {formatTime(new Date(barber?.date).toISOString())}
-                  </td>
-                  <td>
-                    {barber?.creator ? (
-                      barber?.creator
-                    ) : (
-                      <span style={{ color: "orange" }}>
-                        [Umu user mwamusibye muri system]
-                      </span>
-                    )}
-                  </td>
+          <>
+            <button
+              style={{ marginBottom: "1rem" }}
+              onClick={async () => {
+                setIsOpen(true);
+              }}
+            >
+              Kubikura +
+            </button>
+            <table>
+              <thead>
+                <tr>
+                  <th>Umwogoshi</th>
+                  <th>Amafaranga yabikuje</th>
+                  <th>Itariki</th>
+                  <th>Record Creator</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {abogoshi.map((barber) => (
+                  <tr key={barber._id}>
+                    <td>
+                      {options.find((brb) => brb?._id === barber.barber)
+                        ?.name ? (
+                        options.find((brb) => brb?._id === barber.barber)?.name
+                      ) : (
+                        <span style={{ color: "orange" }}>
+                          [Uyu mwogoshi mwamusibye muri system]
+                        </span>
+                      )}
+                    </td>
+                    <td>{formatPrice(barber?.amount)}</td>
+                    <td>
+                      {getStdDate(barber?.date).toISOString().split("T")[0]}
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      {formatTime(new Date(barber?.date).toISOString())}
+                    </td>
+                    <td>
+                      {barber?.creator ? (
+                        barber?.creator
+                      ) : (
+                        <span style={{ color: "orange" }}>
+                          [Umu user mwamusibye muri system]
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
         {abogoshi.length < 1 && !barbLoading ? (
           <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
@@ -1167,8 +1171,7 @@ const Expenses = memo(() => {
       };
       setLoading(true);
       await axios.post(`expenses`, barberUpd);
-      setNetAmount(netAmount - totExpense - parseInt(amount));
-      socket.emit("newBalances", {});
+      setNetAmount(netAmount - parseInt(amount));
       setLoading(false);
       alert("Successfully created!");
       setIsOpen(false);
@@ -1179,11 +1182,11 @@ const Expenses = memo(() => {
         creator: getUsr()?.names,
         date: new Date(),
       });
-      setTotExpense(totExpense + parseInt(amount));
       setAbogoshi(n);
       setShownAbogoshi(n);
       setBarber(null);
       setAmount(null);
+      socket.emit("newBalances", {});
     } catch (e) {
       setLoading(false);
       alert(
@@ -1193,7 +1196,7 @@ const Expenses = memo(() => {
   };
 
   socket.on("newBalances", () => {
-    if (isVisible === false) window.location.reload();
+    if (isVisible !== true) window.location.reload();
   });
 
   useEffect(() => {

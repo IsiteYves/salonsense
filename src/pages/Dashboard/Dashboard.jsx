@@ -52,6 +52,20 @@ const getStdDate = (dt) => {
   return date;
 };
 
+// func to filter by date
+const filtDt = (dtSet, startDate, endDate) => {
+  const mills1 = new Date(startDate).getTime();
+  const mills2 = new Date(endDate).getTime() + 86400000;
+  const newRows = [];
+  for (let i = 0; i < dtSet.length; i++) {
+    const currDateMills = new Date(dtSet[i]?.date).getTime();
+    if (currDateMills >= mills1 && currDateMills <= mills2) {
+      newRows.push(dtSet[i]);
+    }
+  }
+  return newRows;
+};
+
 const removeDuplicateData = (data) => {
   const idSet = new Set();
   const result = [];
@@ -89,6 +103,14 @@ const getCreator = async (mc) => {
   const c = all.find((cr) => cr?._id === mc);
   if (!c) return null;
   return `${c?.role === "BLBR_ADMIN" ? "ADMIN" : "CASHIER"} - ${c?.names}`;
+};
+
+// func to calculate date-respective expenses
+const calcExp = (expenses, startDate, endDate) => {
+  const ndT = filtDt(expenses, startDate, endDate);
+  let exp = 0;
+  for (let expe of ndT) exp += expe?.amountSpent;
+  return exp;
 };
 
 Modal.setAppElement("#root");
@@ -226,9 +248,9 @@ const Abogoshi = () => {
     } catch (e) {
       const { response } = e;
       if (response.status === 400) {
-        alert(`${e?.message}.Try refreshing the page to try again.`);
+        alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
       } else {
-        alert("Please refresh the page.");
+        alert("Please refresh the page. Or logout.");
       }
       setBarbLoading(false);
     }
@@ -466,31 +488,24 @@ const Kogosha = memo(() => {
         if (!results.find((result) => result === row)) results.push(row);
       }
     }
-
+    setTotExpense(calcExp(exps), new Date("2023-04-25"), new Date());
     setShownAbogoshi(results);
   };
 
   const handleSelect = (range) => {
     try {
       const { startDate, endDate } = range?.selection;
-      const mills1 = new Date(startDate).getTime();
-      const mills2 = new Date(endDate).getTime() + 86400000;
-      const newRows = [];
       const dtSet = searchKey ? shownAbogoshi : abogoshi;
-      for (let i = 0; i < dtSet.length; i++) {
-        const currDateMills = new Date(dtSet[i]?.date).getTime();
-        if (currDateMills >= mills1 && currDateMills <= mills2) {
-          newRows.push(dtSet[i]);
-        }
-      }
+      setShownAbogoshi(filtDt(dtSet, startDate, endDate));
+      setTotExpense(calcExp(exps), startDate, endDate);
       setFiltered(true);
-      setShownAbogoshi(newRows);
     } catch (e) {
-      alert(`${e?.message}.Try refreshing the page to try again.`);
+      alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
     }
   };
 
   const [options, setOptions] = useState([]);
+  const [exps, setExps] = useState([]);
 
   const selectionRange = {
     startDate: new Date("2023-04-25"),
@@ -520,20 +535,21 @@ const Kogosha = memo(() => {
       const res = await axios.get("barbers");
       setOptions(res.data);
       const res1 = await axios.get("expenses");
-      let exp = 0;
-      for (let expe of res1.data) exp += expe?.amountSpent;
-      setTotExpense(exp);
+      setExps(res1.data);
+      setTotExpense(calcExp(res1.data), new Date("2023-04-25"), new Date());
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;
       if (response?.status === 400) {
-        alert(`${e?.message}.Try refreshing the page to try again.`);
+        alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
       } else {
-        alert(`${e?.message}.Try refreshing the page to try again.`);
+        alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
       }
       setBarbLoading(false);
     }
   };
+
+  useEffect(() => {}, [shownAbogoshi]);
 
   useEffect(() => {
     let tot = 0;
@@ -646,13 +662,17 @@ const Kogosha = memo(() => {
             Total yavuye mu kogosha:{" "}
             <span style={{ fontWeight: 700 }}>{formatPrice(total)}</span>
           </h3>
-          <h3>
-            Net amount ya saloon (ukuyemo ayo abogoshi
-            bahembwa/bazahembwa/ayakoreshejwe (Expenses)):{" "}
-            <span style={{ fontWeight: 700 }}>
-              {formatPrice((total * (100 - percentage)) / 100 - totExpense)}
-            </span>
-          </h3>
+          {searchKey && shownAbogoshi.length < abogoshi.length ? (
+            ""
+          ) : (
+            <h3>
+              Net amount ya saloon (ukuyemo ayo abogoshi
+              bahembwa/bazahembwa/ayakoreshejwe (Expenses)):{" "}
+              <span style={{ fontWeight: 700 }}>
+                {formatPrice((total * (100 - percentage)) / 100 - totExpense)}
+              </span>
+            </h3>
+          )}
           <Flex>
             <button
               onClick={async () => {
@@ -696,6 +716,7 @@ const Kogosha = memo(() => {
           <table>
             <thead>
               <tr>
+                <th>No</th>
                 <th>Umwogoshi</th>
                 <th>Amafaranga yamwogosheye</th>
                 <th>Itariki</th>
@@ -703,8 +724,9 @@ const Kogosha = memo(() => {
               </tr>
             </thead>
             <tbody>
-              {shownAbogoshi.map((barber) => (
+              {shownAbogoshi.map((barber, ind) => (
                 <tr key={barber._id}>
+                  <td>{ind + 1}</td>
                   <td>
                     {options.find((brb) => brb?._id === barber.barber)?.name ? (
                       options.find((brb) => brb?._id === barber.barber)?.name
@@ -841,9 +863,9 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
     } catch (e) {
       const { response } = e;
       if (response.status === 400) {
-        alert(`${e?.message}.Try refreshing the page to try again.`);
+        alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
       } else {
-        alert(`${e?.message}.Try refreshing the page to try again.`);
+        alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
       }
       setBarbLoading(false);
     }
@@ -1086,26 +1108,17 @@ const Expenses = memo(() => {
       setBarbLoading(false);
     } catch (e) {
       setBarbLoading(false);
-      alert(`${e?.message}.Try refreshing the page to try again.`);
+      alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
     }
   };
 
   const handleSelect = (range) => {
     try {
       const { startDate, endDate } = range?.selection;
-      const mills1 = new Date(startDate).getTime();
-      const mills2 = new Date(endDate).getTime() + 86400000;
-      const newRows = [];
-      for (let i = 0; i < abogoshi.length; i++) {
-        const currDateMills = new Date(abogoshi[i]?.date).getTime();
-        if (currDateMills >= mills1 && currDateMills <= mills2) {
-          newRows.push(abogoshi[i]);
-        }
-      }
+      setShownAbogoshi(filtDt(abogoshi, startDate, endDate));
       setFiltered(true);
-      setShownAbogoshi(newRows);
     } catch (e) {
-      alert(`${e?.message}.Try refreshing the page to try again.`);
+      alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
     }
   };
 
@@ -1115,7 +1128,6 @@ const Expenses = memo(() => {
       const response = await axios.get("expenses");
       const ab = response.data;
       const nu = [];
-      let tot = 0;
       for (let i = 0; i < ab.length; i++) {
         let creator = await getCreator(ab[i]?.creator);
         const a = {
@@ -1125,20 +1137,19 @@ const Expenses = memo(() => {
           amountSpent: ab[i]?.amountSpent,
           creator,
         };
-        tot += parseInt(ab[i]?.amountSpent);
         nu.push(a);
       }
       await findTot();
-      setTotExpense(tot);
+      setTotExpense(calcExp(nu), new Date("2023-04-25"), new Date());
       setAbogoshi(nu);
       setShownAbogoshi(nu);
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;
       if (response.status === 400) {
-        alert(`${e?.message}.Try refreshing the page to try again.`);
+        alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
       } else {
-        alert(`${e?.message}.Try refreshing the page to try again.`);
+        alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
       }
       setBarbLoading(false);
     }
@@ -1492,9 +1503,9 @@ const Cashiers = memo(() => {
     } catch (e) {
       const { response } = e;
       if (response.status === 400) {
-        alert(`${e?.message}.Try refreshing the page to try again.`);
+        alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
       } else {
-        alert("Please refresh the page.");
+        alert("Please refresh the page. Or logout.");
       }
       setBarbLoading(false);
     }
@@ -1915,9 +1926,9 @@ const Dashboard = memo(() => {
     } catch (e) {
       const { response } = e;
       if (response.status === 400) {
-        alert(`${e?.message}.Try refreshing the page to try again.`);
+        alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
       } else {
-        alert(`${e?.message}.Try refreshing the page to try again.`);
+        alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
       }
       setBarbLoading(false);
     }

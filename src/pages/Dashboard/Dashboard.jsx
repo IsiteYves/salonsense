@@ -477,7 +477,7 @@ const Kogosha = memo(() => {
   const [totExpense, setTotExpense] = useState(0);
 
   const onSearch = (value) => {
-    if (value !== searchKey) setSearchKey(value);
+    if (value !== searchKey) setSearchKey(`${value}`.trim());
     const results = [];
     for (let row of abogoshi) {
       if (

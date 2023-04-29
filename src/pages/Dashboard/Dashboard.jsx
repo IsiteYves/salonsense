@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { Route, Link, Routes, useNavigate } from "react-router-dom";
 import NotFound from "../../components/Notfound";
 import DashboardStyled from "./DashboardStyled";
@@ -7,6 +7,7 @@ import jwt_decode from "jwt-decode";
 import axios from "axios";
 import { DateRangePicker } from "react-date-range";
 import "react-date-range/dist/styles.css";
+import { setCrs } from "../../slices/AppSlice";
 import "react-date-range/dist/theme/default.css";
 import {
   Flex,
@@ -22,6 +23,7 @@ import {
 import { SearchIcon, SmallCloseIcon } from "@chakra-ui/icons";
 import io from "socket.io-client";
 import usePageVisibility from "../../customHooks/usePageVisibility";
+import { useDispatch, useSelector } from "react-redux";
 
 const socket = io(`${process.env.REACT_APP_PASSAGE}`);
 
@@ -93,13 +95,7 @@ const getUsr = () => {
   return decoded?.user;
 };
 
-const getCreators = async () => {
-  const res = await axios.get("admin");
-  return res.data;
-};
-
-const getCreator = async (mc) => {
-  const all = await getCreators();
+const getCreator = async (all, mc) => {
   const c = all.find((cr) => cr?._id === mc);
   if (!c) return null;
   return `${c?.role === "BLBR_ADMIN" ? "ADMIN" : "CASHIER"} - ${c?.names}`;
@@ -128,7 +124,6 @@ const customStyles = {
     boxShadow: "0 0 15px #cacaca",
   },
 };
-const addForm = {};
 
 const Abogoshi = () => {
   document.title = "Penter Saloon | Abogoshi";
@@ -400,7 +395,7 @@ const Abogoshi = () => {
         >
           Close
         </button>
-        <form onSubmit={handleSubmit} style={addForm} id="addForm">
+        <form onSubmit={handleSubmit} id="addForm">
           <h2 style={{ marginBottom: "1rem", textAlign: "center" }}>
             {editMode ? "Edit Barber Info" : "Umwogoshi Mushya"}
           </h2>
@@ -488,7 +483,7 @@ const Kogosha = memo(() => {
         if (!results.find((result) => result === row)) results.push(row);
       }
     }
-    setTotExpense(calcExp(exps), new Date("2023-04-25"), new Date());
+    setTotExpense(calcExp(exps, new Date("2023-04-25"), new Date()));
     setShownAbogoshi(results);
   };
 
@@ -497,7 +492,7 @@ const Kogosha = memo(() => {
       const { startDate, endDate } = range?.selection;
       const dtSet = searchKey ? shownAbogoshi : abogoshi;
       setShownAbogoshi(filtDt(dtSet, startDate, endDate));
-      setTotExpense(calcExp(exps), startDate, endDate);
+      setTotExpense(calcExp(exps, startDate, endDate));
       setFiltered(true);
     } catch (e) {
       alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
@@ -506,6 +501,7 @@ const Kogosha = memo(() => {
 
   const [options, setOptions] = useState([]);
   const [exps, setExps] = useState([]);
+  const all = useSelector((state) => state.creators.creators);
 
   const selectionRange = {
     startDate: new Date("2023-04-25"),
@@ -520,7 +516,7 @@ const Kogosha = memo(() => {
       const ab = response.data;
       const nu = [];
       for (let i = 0; i < ab.length; i++) {
-        let creator = await getCreator(ab[i]?.creator);
+        let creator = await getCreator(all, ab[i]?.creator);
         const a = {
           _id: ab[i]?._id,
           date: ab[i]?.date,
@@ -536,7 +532,7 @@ const Kogosha = memo(() => {
       setOptions(res.data);
       const res1 = await axios.get("expenses");
       setExps(res1.data);
-      setTotExpense(calcExp(res1.data), new Date("2023-04-25"), new Date());
+      setTotExpense(calcExp(res1.data, new Date("2023-04-25"), new Date()));
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;
@@ -666,8 +662,8 @@ const Kogosha = memo(() => {
             ""
           ) : (
             <h3>
-              Net amount ya saloon (ukuyemo ayo abogoshi
-              bahembwa/bazahembwa/ayakoreshejwe (Expenses)):{" "}
+              Net amount ya saloon (ukuyemo ayo abogoshi bazahembwa
+              n'ayakoreshejwe (Expenses)):{" "}
               <span style={{ fontWeight: 700 }}>
                 {formatPrice((total * (100 - percentage)) / 100 - totExpense)}
               </span>
@@ -786,7 +782,7 @@ const Kogosha = memo(() => {
         >
           Close
         </button>
-        <form onSubmit={handleSubmit} style={addForm} id="addForm">
+        <form onSubmit={handleSubmit} id="addForm">
           <h2 style={{ marginBottom: "1rem", textAlign: "center" }}>
             Hogoshwe Umuntu
           </h2>
@@ -838,6 +834,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
   const [modalIsOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState([]);
+  const all = useSelector((state) => state.creators.creators);
 
   const fetchAbogoshi = async () => {
     try {
@@ -846,7 +843,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
       const ab = response.data;
       const nu = [];
       for (let i = 0; i < ab.length; i++) {
-        let creator = await getCreator(ab[i]?.creator);
+        let creator = await getCreator(all, ab[i]?.creator);
         const a = {
           _id: ab[i]?._id,
           date: ab[i]?.date,
@@ -1034,7 +1031,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
         >
           Close
         </button>
-        <form onSubmit={handleSubmit} style={addForm} id="addForm">
+        <form onSubmit={handleSubmit} id="addForm">
           <h2 style={{ marginBottom: "1rem", textAlign: "center" }}>
             Kubikurira Umwogoshi
           </h2>
@@ -1096,6 +1093,7 @@ const Expenses = memo(() => {
     endDate: new Date(),
     key: "selection",
   };
+  const all = useSelector((state) => state.creators.creators);
 
   const findTot = async () => {
     try {
@@ -1129,7 +1127,7 @@ const Expenses = memo(() => {
       const ab = response.data;
       const nu = [];
       for (let i = 0; i < ab.length; i++) {
-        let creator = await getCreator(ab[i]?.creator);
+        let creator = await getCreator(all, ab[i]?.creator);
         const a = {
           _id: ab[i]?._id,
           materials: ab[i]?.materials,
@@ -1140,7 +1138,7 @@ const Expenses = memo(() => {
         nu.push(a);
       }
       await findTot();
-      setTotExpense(calcExp(nu), new Date("2023-04-25"), new Date());
+      setTotExpense(calcExp(nu, new Date("2023-04-25"), new Date()));
       setAbogoshi(nu);
       setShownAbogoshi(nu);
       setBarbLoading(false);
@@ -1324,7 +1322,7 @@ const Expenses = memo(() => {
         >
           Close
         </button>
-        <form onSubmit={handleSubmit} style={addForm} id="addForm">
+        <form onSubmit={handleSubmit} id="addForm">
           <h2 style={{ marginBottom: "1rem", textAlign: "center" }}>
             Record new expenses
           </h2>
@@ -1493,7 +1491,7 @@ const Cashiers = memo(() => {
     }
   };
 
-  const fetchDt = async () => {
+  const fetchDt = useCallback(async () => {
     try {
       setBarbLoading(true);
       const res = await axios.get("admin");
@@ -1509,7 +1507,7 @@ const Cashiers = memo(() => {
       }
       setBarbLoading(false);
     }
-  };
+  });
 
   socket.on("newCashier", (data) => {
     if (isVisible === false) {
@@ -1670,7 +1668,7 @@ const Cashiers = memo(() => {
         >
           Close
         </button>
-        <form onSubmit={handleSubmit} style={addForm} id="addForm">
+        <form onSubmit={handleSubmit} id="addForm">
           {!editMode1 && (
             <>
               <div>
@@ -1877,12 +1875,7 @@ const Settings = memo(() => {
       >
         Gusiba data zose (Abogoshi, Abogoshwe, Ayabikujwe)
       </button>
-      <form
-        onSubmit={handleSubmit}
-        style={addForm}
-        id="addForm"
-        className="addForm"
-      >
+      <form onSubmit={handleSubmit} id="addForm" className="addForm">
         {loading && <p>Loading settings...</p>}
         {!loading && (
           <>
@@ -1958,6 +1951,16 @@ const Dashboard = memo(() => {
       window.location.reload();
     }
   });
+  const dispatch = useDispatch();
+
+  const getCreators = async () => {
+    const res = await axios.get("admin");
+    dispatch(setCrs(res.data));
+  };
+
+  useEffect(() => {
+    getCreators();
+  }, []);
 
   socket.on("newSettings", () => {
     window.location.reload();

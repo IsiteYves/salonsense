@@ -6,6 +6,8 @@ import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import reportWebVitals from "./reportWebVitals";
 import { ChakraProvider } from "@chakra-ui/react";
 import axios from "axios";
+import store from "./store";
+import { Provider } from "react-redux";
 
 axios.interceptors.request.use((request) => {
   let apiUrl = request.url;
@@ -19,9 +21,11 @@ axios.interceptors.request.use((request) => {
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <ChakraProvider>
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
+    <Provider store={store}>
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    </Provider>
   </ChakraProvider>
 );
 serviceWorkerRegistration.register();

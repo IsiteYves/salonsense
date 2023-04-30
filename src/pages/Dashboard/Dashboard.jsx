@@ -54,6 +54,20 @@ const getStdDate = (dt) => {
   return date;
 };
 
+const calcRes = (value, abogoshi, options) => {
+  const results = [];
+  for (let row of abogoshi) {
+    if (
+      `${options.find((brb) => brb?._id === row?.barber)?.name}`
+        .toLowerCase()
+        .includes(value.toLowerCase())
+    ) {
+      if (!results.find((result) => result === row)) results.push(row);
+    }
+  }
+  return results;
+};
+
 // func to filter by date
 const filtDt = (dtSet, startDate, endDate) => {
   const mills1 = new Date(startDate).getTime();
@@ -473,16 +487,7 @@ const Kogosha = memo(() => {
 
   const onSearch = (value) => {
     if (value !== searchKey) setSearchKey(`${value}`.trim());
-    const results = [];
-    for (let row of abogoshi) {
-      if (
-        `${options.find((brb) => brb?._id === row?.barber)?.name}`
-          .toLowerCase()
-          .includes(value.toLowerCase())
-      ) {
-        if (!results.find((result) => result === row)) results.push(row);
-      }
-    }
+    const results = calcRes(value, abogoshi, options);
     setTotExpense(calcExp(exps, new Date("2023-04-25"), new Date()));
     setShownAbogoshi(results);
   };
@@ -490,7 +495,8 @@ const Kogosha = memo(() => {
   const handleSelect = (range) => {
     try {
       const { startDate, endDate } = range?.selection;
-      const dtSet = searchKey ? shownAbogoshi : abogoshi;
+      const filt = calcRes(searchKey, abogoshi, options);
+      const dtSet = searchKey ? filt : abogoshi;
       setShownAbogoshi(filtDt(dtSet, startDate, endDate));
       setTotExpense(calcExp(exps, startDate, endDate));
       setFiltered(true);

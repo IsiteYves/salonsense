@@ -484,11 +484,16 @@ const Kogosha = memo(() => {
   const [dtFilter, setDtFilter] = useState(false);
   const [searchKey, setSearchKey] = useState("");
   const [totExpense, setTotExpense] = useState(0);
+  const [selectionRange, setSelectionRange] = useState({
+    startDate: new Date("2023-04-28"),
+    endDate: new Date(),
+    key: "selection",
+  });
 
   const onSearch = (value) => {
     if (value !== searchKey) setSearchKey(`${value}`.trim());
     const results = calcRes(value, abogoshi, options);
-    setTotExpense(calcExp(exps, new Date("2023-04-25"), new Date()));
+    setTotExpense(calcExp(exps, new Date("2023-04-28"), new Date()));
     setShownAbogoshi(results);
   };
 
@@ -500,6 +505,7 @@ const Kogosha = memo(() => {
       setShownAbogoshi(filtDt(dtSet, startDate, endDate));
       setTotExpense(calcExp(exps, startDate, endDate));
       setFiltered(true);
+      setSelectionRange({ startDate, endDate, key: "selection" });
     } catch (e) {
       alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
     }
@@ -508,12 +514,6 @@ const Kogosha = memo(() => {
   const [options, setOptions] = useState([]);
   const [exps, setExps] = useState([]);
   const all = useSelector((state) => state.creators.creators);
-
-  const selectionRange = {
-    startDate: new Date("2023-04-25"),
-    endDate: new Date(),
-    key: "selection",
-  };
 
   const fetchAbogoshi = async () => {
     try {
@@ -538,7 +538,7 @@ const Kogosha = memo(() => {
       setOptions(res.data);
       const res1 = await axios.get("expenses");
       setExps(res1.data);
-      setTotExpense(calcExp(res1.data, new Date("2023-04-25"), new Date()));
+      setTotExpense(calcExp(res1.data, new Date("2023-04-28"), new Date()));
       setBarbLoading(false);
     } catch (e) {
       const { response } = e;
@@ -648,6 +648,14 @@ const Kogosha = memo(() => {
                 <Switch
                   id="email-alerts"
                   onChange={() => {
+                    if (dtFilter) {
+                      handleSelect({
+                        selection: {
+                          startDate: new Date("2023-04-28"),
+                          endDate: new Date(),
+                        },
+                      });
+                    }
                     setDtFilter(!dtFilter);
                   }}
                 />
@@ -1094,11 +1102,11 @@ const Expenses = memo(() => {
   const [totExpense, setTotExpense] = useState(0);
   const [dtFilter, setDtFilter] = useState(false);
   const [filtered, setFiltered] = useState(false);
-  const selectionRange = {
-    startDate: new Date("2023-04-25"),
+  const [selectionRange, setSelectionRange] = useState({
+    startDate: new Date("2023-04-28"),
     endDate: new Date(),
     key: "selection",
-  };
+  });
   const all = useSelector((state) => state.creators.creators);
 
   const findTot = async () => {
@@ -1121,6 +1129,7 @@ const Expenses = memo(() => {
       const { startDate, endDate } = range?.selection;
       setShownAbogoshi(filtDt(abogoshi, startDate, endDate));
       setFiltered(true);
+      setSelectionRange({ startDate, endDate, key: "selection" });
     } catch (e) {
       alert(`${e?.message}.Try refreshing the page to try again.Or logout.`);
     }
@@ -1144,7 +1153,7 @@ const Expenses = memo(() => {
         nu.push(a);
       }
       await findTot();
-      setTotExpense(calcExp(nu, new Date("2023-04-25"), new Date()));
+      setTotExpense(calcExp(nu, new Date("2023-04-28"), new Date()));
       setAbogoshi(nu);
       setShownAbogoshi(nu);
       setBarbLoading(false);
@@ -1249,6 +1258,14 @@ const Expenses = memo(() => {
             <Switch
               id="email-alerts"
               onChange={() => {
+                if (dtFilter) {
+                  handleSelect({
+                    selection: {
+                      startDate: new Date("2023-04-28"),
+                      endDate: new Date(),
+                    },
+                  });
+                }
                 setDtFilter(!dtFilter);
               }}
             />

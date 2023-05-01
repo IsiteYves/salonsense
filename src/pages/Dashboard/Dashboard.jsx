@@ -54,6 +54,13 @@ const getStdDate = (dt) => {
   return date;
 };
 
+// func to sort desc by date
+const compareAsc = (a, b) => {
+  if (a[`date`] < b[`date`]) return 1;
+  if (a[`date`] > b[`date`]) return -1;
+  return 0;
+};
+
 const calcRes = (value, abogoshi, options) => {
   const results = [];
   for (let row of abogoshi) {
@@ -272,7 +279,9 @@ const Abogoshi = () => {
           return barber._id === data._id;
         })
       ) {
-        setAbakozi((prev) => removeDuplicateData([...prev, data]));
+        setAbakozi((prev) =>
+          removeDuplicateData([...prev, data]).sort(compareAsc)
+        );
         return;
       }
     }
@@ -532,8 +541,8 @@ const Kogosha = memo(() => {
         };
         nu.push(a);
       }
-      setAbogoshi(nu);
-      setShownAbogoshi(nu);
+      setAbogoshi(nu.sort(compareAsc));
+      setShownAbogoshi(nu.sort(compareAsc));
       const res = await axios.get("barbers");
       setOptions(res.data);
       const res1 = await axios.get("expenses");
@@ -612,7 +621,9 @@ const Kogosha = memo(() => {
   socket.on("newBarbers", (data) => {
     if (isVisible === false) {
       if (!options.find((brb) => brb._id === data._id)) {
-        setOptions((prev) => removeDuplicateData([...prev, data]));
+        setOptions((prev) =>
+          removeDuplicateData([...prev, data]).sort(compareAsc)
+        );
         return;
       }
     }
@@ -940,7 +951,9 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
   socket.on("newBarbers", (data) => {
     if (isVisible === false) {
       if (!options.find((brb) => brb._id === data._id)) {
-        setOptions((prev) => removeDuplicateData([...prev, data]));
+        setOptions((prev) =>
+          removeDuplicateData([...prev, data]).sort(compareAsc)
+        );
         return;
       }
     }
@@ -977,6 +990,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
             <table>
               <thead>
                 <tr>
+                  <th>No</th>
                   <th>Umwogoshi</th>
                   <th>Amafaranga yabikuje</th>
                   <th>Itariki</th>
@@ -984,8 +998,9 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
                 </tr>
               </thead>
               <tbody>
-                {abogoshi.map((barber) => (
+                {abogoshi.map((barber, ind) => (
                   <tr key={barber._id}>
+                    <td>{ind + 1}</td>
                     <td>
                       {options.find((brb) => brb?._id === barber.barber)
                         ?.name ? (
@@ -1285,6 +1300,7 @@ const Expenses = memo(() => {
           <table>
             <thead>
               <tr>
+                <th>No</th>
                 <th>Icyo amafaranga yakoreshejwe</th>
                 <th>Umubare w'Amafaranga yakoreshejwe</th>
                 <th>Itariki</th>
@@ -1292,8 +1308,9 @@ const Expenses = memo(() => {
               </tr>
             </thead>
             <tbody>
-              {shownAbogoshi.map((barber) => (
+              {shownAbogoshi.map((barber, ind) => (
                 <tr key={barber._id}>
+                  <td>{ind + 1}</td>
                   <td>{barber?.materials}</td>
                   <td>{formatPrice(barber?.amountSpent)}</td>
                   <td>
@@ -1539,7 +1556,9 @@ const Cashiers = memo(() => {
           return barber._id === data._id;
         })
       ) {
-        setAbakozi((prev) => removeDuplicateData([...prev, data]));
+        setAbakozi((prev) =>
+          removeDuplicateData([...prev, data]).sort(compareAsc)
+        );
         return;
       }
     }

@@ -13,6 +13,7 @@ const Login = () => {
   const [gotCode, setGotCode] = useState(false);
 
   const [rCode, setRCode] = useState("");
+  const [rId, setRId] = useState(null);
   const [resetPhone, setResetPhone] = useState("");
   const [usCode, setUsCode] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
@@ -82,8 +83,9 @@ const Login = () => {
       const response = await axios.get(
         `admin/get-reset-code?phone=${resetPhone}`
       );
-      const { resetCode } = response.data;
+      const { resetCode, id } = response.data;
       setRCode(resetCode);
+      setRId(id);
       setForgotPassword(false);
       setResetPhone("");
       setGotCode(true);
@@ -112,18 +114,14 @@ const Login = () => {
         return;
       }
       setResetPLoading(true);
-      const res = await axios.get(`admin`);
-      const ans = res.data;
-      if (ans.length < 1) {
-        alert("No account registered");
+      if (!rId) {
+        alert("Error.Refresh the page and try again.");
         return;
       }
-      for (let an of ans) {
-        await axios.put(`admin/update-password/${an?._id}`, {
-          newPassword: newpassword,
-          pswdConfirm: newpasswordC,
-        });
-      }
+      await axios.put(`admin/update-password/${rId}`, {
+        newPassword: newpassword,
+        pswdConfirm: newpasswordC,
+      });
       alert("You have successfully reset your password.");
       setCCode(false);
       setResetPLoading(false);

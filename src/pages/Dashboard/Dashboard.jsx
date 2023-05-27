@@ -1254,7 +1254,7 @@ const Expenses = memo(() => {
             Record new expense +
           </button>
           <b>
-            <span style={{ fontWeight: 400 }}>Asigaye muri saloon:</span>{" "}
+            <span style={{ fontWeight: 400 }}>Amount remaining in saloon:</span>{" "}
             {formatPrice(netAmount - totExpense)}
           </b>
           &nbsp;&nbsp;&nbsp;&nbsp;

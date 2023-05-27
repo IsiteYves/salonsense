@@ -147,7 +147,7 @@ const customStyles = {
 };
 
 const Abogoshi = () => {
-  document.title = "Penter Saloon | Abogoshi";
+  document.title = "SalonSense | Barbers";
   const isVisible = usePageVisibility();
   const [abakozi, setAbakozi] = useState([]);
 
@@ -299,9 +299,9 @@ const Abogoshi = () => {
   }, []);
   return (
     <div>
-      <h2>Abogoshi</h2>
+      <h2>Barbers</h2>
       {getUsr()?.role === "BLBR_ADMIN" && (
-        <button onClick={() => setIsOpen(true)}>Umwogoshi Mushya +</button>
+        <button onClick={() => setIsOpen(true)}>New barber +</button>
       )}
       <div>
         {barbLoading ? (
@@ -384,7 +384,7 @@ const Abogoshi = () => {
         )}
         {abakozi.length < 1 && !barbLoading ? (
           <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
-            Nta bogoshi bahari ubu.
+            No barbers recorded yet.
           </p>
         ) : (
           ""
@@ -420,7 +420,7 @@ const Abogoshi = () => {
         </button>
         <form onSubmit={handleSubmit} id="addForm">
           <h2 style={{ marginBottom: "1rem", textAlign: "center" }}>
-            {editMode ? "Edit Barber Info" : "Umwogoshi Mushya"}
+            {editMode ? "Edit Barber Info" : "New barber"}
           </h2>
           <div>
             <label htmlFor="name">Name *</label>
@@ -479,7 +479,7 @@ const Abogoshi = () => {
 };
 
 const Kogosha = memo(() => {
-  document.title = "Penter Saloon | Amafaranga yavuye mu kogosha";
+  document.title = "SalonSense | Revenue";
   const isVisible = usePageVisibility();
   const [abogoshi, setAbogoshi] = useState([]);
   const [shownAbogoshi, setShownAbogoshi] = useState([]);
@@ -647,7 +647,7 @@ const Kogosha = memo(() => {
   }, []);
   return (
     <div>
-      <h2>Ayavuye mu kogosha</h2>
+      <h2>Revenue Earned</h2>
       {!barbLoading && (
         <>
           {abogoshi.length > 0 && (
@@ -700,7 +700,7 @@ const Kogosha = memo(() => {
                 setIsOpen(true);
               }}
             >
-              Hogoshwe Umuntu +
+              New shave record +
             </button>
             <Spacer />
             <InputGroup width={300}>
@@ -738,9 +738,9 @@ const Kogosha = memo(() => {
             <thead>
               <tr>
                 <th>No</th>
-                <th>Umwogoshi</th>
-                <th>Amafaranga yamwogosheye</th>
-                <th>Itariki</th>
+                <th>Barber's name</th>
+                <th>Amount the client paid</th>
+                <th>Date</th>
                 <th>Record Creator</th>
               </tr>
             </thead>
@@ -780,8 +780,8 @@ const Kogosha = memo(() => {
         {shownAbogoshi.length < 1 && !barbLoading ? (
           <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
             {filtered
-              ? "Nta bakiriya bogoshwe hagati y'ayo matariki uhisemo."
-              : "Nta bakiriya barogoshwa."}
+              ? "No clients were received between that date range you chose."
+              : "No clients recorded yet."}
           </p>
         ) : (
           ""
@@ -809,7 +809,7 @@ const Kogosha = memo(() => {
         </button>
         <form onSubmit={handleSubmit} id="addForm">
           <h2 style={{ marginBottom: "1rem", textAlign: "center" }}>
-            Hogoshwe Umuntu
+            New shave record
           </h2>
           <div>
             <label htmlFor="barber">Uwamwogoshe</label>
@@ -831,7 +831,7 @@ const Kogosha = memo(() => {
             </select>
           </div>
           <div>
-            <label htmlFor="phone">Amafaranga amwogosheye</label>
+            <label htmlFor="phone">Amount the client paid</label>
             <input
               type="tel"
               id="phone"
@@ -850,7 +850,7 @@ const Kogosha = memo(() => {
 });
 
 const AmafarangaAbagoshiBabikuje = memo(() => {
-  document.title = "Penter Saloon | Amafaranga Abagoshi Bahawe";
+  document.title = "SalonSense | Money given to Barbers";
   const isVisible = usePageVisibility();
   const [abogoshi, setAbogoshi] = useState([]);
   const [barbLoading, setBarbLoading] = useState(false);
@@ -902,7 +902,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
         return;
       }
       if ((percentage / 100) * barber?.balance - parseInt(amount) < 0) {
-        alert("Uyu mwogoshi ntabwo afitemo amafaranga ahagije");
+        alert("This barber does not have enough balance.");
         return;
       }
       if (!window.confirm("Confirm withdrawal?")) return;
@@ -973,7 +973,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
   }, []);
   return (
     <div>
-      <h2>Amafaranga Abogoshi Bahawe</h2>
+      <h2>Salary given to barbers</h2>
       <div>
         {barbLoading ? (
           <p>Loading data...</p>
@@ -991,9 +991,9 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
               <thead>
                 <tr>
                   <th>No</th>
-                  <th>Umwogoshi</th>
-                  <th>Amafaranga yabikuje</th>
-                  <th>Itariki</th>
+                  <th>Barber's name</th>
+                  <th>Amount received</th>
+                  <th>Date</th>
                   <th>Record Creator</th>
                 </tr>
               </thead>
@@ -1034,7 +1034,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
         )}
         {abogoshi.length < 1 && !barbLoading ? (
           <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
-            Nta bogoshi bari babikuza.
+            No barbers have received money yet.
           </p>
         ) : (
           ""
@@ -1085,7 +1085,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
             </select>
           </div>
           <div>
-            <label htmlFor="phone">Amafaranga abikuje</label>
+            <label htmlFor="phone">Amount received</label>
             <input
               type="tel"
               id="phone"
@@ -1104,7 +1104,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
 });
 
 const Expenses = memo(() => {
-  document.title = "Penter Saloon | Amafaranga Yasotse Muri Saloon (Expenses)";
+  document.title = "SalonSense | Expenses";
   const isVisible = usePageVisibility();
   const [abogoshi, setAbogoshi] = useState([]);
   const [shownAbogoshi, setShownAbogoshi] = useState([]);
@@ -1194,7 +1194,7 @@ const Expenses = memo(() => {
 
       if (parseInt(amount) > netAmount - totExpense) {
         alert(
-          `Saloon ubu ifitemo amafaranga make ugereranyije n'ayo uvuze.Ifite ${formatPrice(
+          `The Saloon currently has less money than what you specified.The current balance is ${formatPrice(
             netAmount - totExpense
           )}`
         );
@@ -1243,7 +1243,7 @@ const Expenses = memo(() => {
   }, []);
   return (
     <div>
-      <h2>Amafaranga yasotse muri saloon (Expenses)</h2>
+      <h2>Expenses</h2>
       {!barbLoading && (
         <>
           <button
@@ -1254,7 +1254,7 @@ const Expenses = memo(() => {
             Record new expense +
           </button>
           <b>
-            <span style={{ fontWeight: 400 }}>Asigaye muri saloon:</span>{" "}
+            <span style={{ fontWeight: 400 }}>Amount remaining in saloon:</span>{" "}
             {formatPrice(netAmount - totExpense)}
           </b>
           &nbsp;&nbsp;&nbsp;&nbsp;
@@ -1301,9 +1301,9 @@ const Expenses = memo(() => {
             <thead>
               <tr>
                 <th>No</th>
-                <th>Icyo amafaranga yakoreshejwe</th>
-                <th>Umubare w'Amafaranga yakoreshejwe</th>
-                <th>Itariki</th>
+                <th>What the money is used for</th>
+                <th>Amount spent</th>
+                <th>Date</th>
                 <th>Record Creator</th>
               </tr>
             </thead>
@@ -1335,8 +1335,8 @@ const Expenses = memo(() => {
         {shownAbogoshi.length < 1 && !barbLoading ? (
           <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
             {filtered
-              ? "Nta mafaranga yasotse muri saloon ku ma expenses muri ayo matariki uhisemo."
-              : "Nta mafaranga arasoka muri saloon ku ma expenses."}
+              ? "No expenses between that date range you chose."
+              : "No expenses recorded yet."}
           </p>
         ) : (
           ""
@@ -1367,7 +1367,7 @@ const Expenses = memo(() => {
             Record new expenses
           </h2>
           <div>
-            <label htmlFor="phone">Icyo amafaranga yakoreshejwe</label>
+            <label htmlFor="phone">What the money is used for</label>
             <textarea
               id="materials"
               placeholder="Andika hano..."
@@ -1377,7 +1377,7 @@ const Expenses = memo(() => {
             ></textarea>
           </div>
           <div>
-            <label htmlFor="igiciro">Igiciro (Amafaranga)</label>
+            <label htmlFor="igiciro">Amount spent</label>
             <input
               type="text"
               id="igiciro"
@@ -1396,7 +1396,7 @@ const Expenses = memo(() => {
 });
 
 const Cashiers = memo(() => {
-  document.title = "Penter Saloon | Aba Cashiers";
+  document.title = "SalonSense | Cashiers";
   const isVisible = usePageVisibility();
   const [abakozi, setAbakozi] = useState([]);
   const [editMode1, setEditMode1] = useState(false);
@@ -1670,7 +1670,7 @@ const Cashiers = memo(() => {
         )}
         {abakozi.length < 1 && !barbLoading ? (
           <p style={{ padding: "1rem 2rem", backgroundColor: "orange" }}>
-            Nta ba cashiers bahari ubu.
+            No cashiers registered yet.
           </p>
         ) : (
           ""
@@ -2010,7 +2010,7 @@ const Dashboard = memo(() => {
   return (
     <DashboardStyled>
       <div className="sidebar">
-        <h2>Penter Saloon</h2>
+        <h2>SalonSense</h2>
         <h2 style={{ textTransform: "capitalize", padding: "0.7rem 2rem" }}>
           {usr?.names}&nbsp;&nbsp;
           <span style={{ fontSize: "14px", color: "green" }}>
@@ -2028,18 +2028,18 @@ const Dashboard = memo(() => {
         </h2>
         <ul>
           <li>
-            <Link to="/abogoshi">Abogoshi</Link>
+            <Link to="/abogoshi">Barbers</Link>
           </li>
           <li>
-            <Link to="/kogosha">Ayavuye mu kogosha</Link>
+            <Link to="/kogosha">Revenue Earned</Link>
           </li>
           <li>
             <Link to="/amafaranga-abagoshi-babikuje">
-              Amafaranga abagoshi bahawe
+              Salary given to Barbers
             </Link>
           </li>
           <li>
-            <Link to="/amafaranga-yosotse">Amafaranga yasotse (Expenses)</Link>
+            <Link to="/amafaranga-yosotse">Expenses</Link>
           </li>
           {usr?.role === "BLBR_ADMIN" && (
             <li>

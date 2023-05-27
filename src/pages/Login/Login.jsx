@@ -23,6 +23,7 @@ const Login = () => {
   const [newpassword, setNewPassword] = useState("");
   const [newpasswordC, setNewPasswordC] = useState("");
   document.title = "Welcome to Saloon Manager";
+  document.body.style.backgroundColor = "#36056f";
 
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);
@@ -246,7 +247,7 @@ const Login = () => {
 
   return (
     <LoginStyled className="Login">
-      <h2>PENTER SALOON Login</h2>
+      <h2>SalonSense Login</h2>
       <form onSubmit={handleLogin}>
         <label htmlFor="username">Phone number:</label>
         <input

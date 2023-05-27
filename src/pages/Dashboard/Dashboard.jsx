@@ -2048,7 +2048,7 @@ const Dashboard = memo(() => {
           )}
           {usr?.role === "BLBR_ADMIN" && (
             <li>
-              <Link to="/cashiers">Aba Cashiers</Link>
+              <Link to="/cashiers">Cashiers</Link>
             </li>
           )}
           <li

@@ -23,6 +23,7 @@ const Login = () => {
   const [newpassword, setNewPassword] = useState("");
   const [newpasswordC, setNewPasswordC] = useState("");
   document.title = "Welcome to Saloon Manager";
+  document.body.style.backgroundColor = "#36056f";
 
   const handleUsernameChange = (event) => {
     setUsername(event.target.value);

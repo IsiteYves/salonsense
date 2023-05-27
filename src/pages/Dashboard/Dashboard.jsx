@@ -147,7 +147,7 @@ const customStyles = {
 };
 
 const Abogoshi = () => {
-  document.title = "Penter Saloon | Abogoshi";
+  document.title = "SalonSense | Abogoshi";
   const isVisible = usePageVisibility();
   const [abakozi, setAbakozi] = useState([]);
 
@@ -479,7 +479,7 @@ const Abogoshi = () => {
 };
 
 const Kogosha = memo(() => {
-  document.title = "Penter Saloon | Amafaranga yavuye mu kogosha";
+  document.title = "SalonSense | Amafaranga yavuye mu kogosha";
   const isVisible = usePageVisibility();
   const [abogoshi, setAbogoshi] = useState([]);
   const [shownAbogoshi, setShownAbogoshi] = useState([]);
@@ -850,7 +850,7 @@ const Kogosha = memo(() => {
 });
 
 const AmafarangaAbagoshiBabikuje = memo(() => {
-  document.title = "Penter Saloon | Amafaranga Abagoshi Bahawe";
+  document.title = "SalonSense | Amafaranga Abagoshi Bahawe";
   const isVisible = usePageVisibility();
   const [abogoshi, setAbogoshi] = useState([]);
   const [barbLoading, setBarbLoading] = useState(false);
@@ -1104,7 +1104,7 @@ const AmafarangaAbagoshiBabikuje = memo(() => {
 });
 
 const Expenses = memo(() => {
-  document.title = "Penter Saloon | Amafaranga Yasotse Muri Saloon (Expenses)";
+  document.title = "SalonSense | Amafaranga Yasotse Muri Saloon (Expenses)";
   const isVisible = usePageVisibility();
   const [abogoshi, setAbogoshi] = useState([]);
   const [shownAbogoshi, setShownAbogoshi] = useState([]);
@@ -1396,7 +1396,7 @@ const Expenses = memo(() => {
 });
 
 const Cashiers = memo(() => {
-  document.title = "Penter Saloon | Aba Cashiers";
+  document.title = "SalonSense | Aba Cashiers";
   const isVisible = usePageVisibility();
   const [abakozi, setAbakozi] = useState([]);
   const [editMode1, setEditMode1] = useState(false);
@@ -2010,7 +2010,7 @@ const Dashboard = memo(() => {
   return (
     <DashboardStyled>
       <div className="sidebar">
-        <h2>Penter Saloon</h2>
+        <h2>SalonSense</h2>
         <h2 style={{ textTransform: "capitalize", padding: "0.7rem 2rem" }}>
           {usr?.names}&nbsp;&nbsp;
           <span style={{ fontSize: "14px", color: "green" }}>

@@ -246,7 +246,7 @@ const Login = () => {
 
   return (
     <LoginStyled className="Login">
-      <h2>PENTER SALOON Login</h2>
+      <h2>SalonSense Login</h2>
       <form onSubmit={handleLogin}>
         <label htmlFor="username">Phone number:</label>
         <input

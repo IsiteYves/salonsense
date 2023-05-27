@@ -2,7 +2,7 @@
 
 SalonSense is a comprehensive salon management system designed to streamline and optimize various aspects of running a salon. It provides features to manage revenue, track expenses, schedule appointments, and simplify day-to-day operations.
 
-See it live at: (https://salonsense.vercel.app)[https://salonsense.vercel.app]
+See it live at: [https://salonsense.vercel.app](https://salonsense.vercel.app)
 
 ## Inspiration
 

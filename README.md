@@ -38,6 +38,12 @@ You can use the following default credentials to access SalonSense:
 - **Phone Number:** 0791457023
 - **Password:** kyn321
 
+## Screenshots
+![1](https://github.com/IsiteYves/salonsense/assets/61538146/ba472f44-c191-40ea-85b7-4f93a612c0a6)
+![2](https://github.com/IsiteYves/salonsense/assets/61538146/b2e4247b-0a70-4171-b84b-f7537c6646a6)
+![3](https://github.com/IsiteYves/salonsense/assets/61538146/775517bd-5af4-4a0c-8f9c-667fa7162925)
+![4](https://github.com/IsiteYves/salonsense/assets/61538146/4af0c8f4-8a0d-483d-ad40-091d3bc4b41f)
+
 ## Contributing
 
 Contributions to SalonSense are welcome! If you would like to contribute, please fork the repo.
